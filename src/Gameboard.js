@@ -12,11 +12,11 @@ class Gameboard {
   }
 
   get coordinates() {
-    return [...this.#coordinates];
+    return this.#coordinates.map((row) => row.map((cell) => ({ ...cell })));
   }
 
   get missedShots() {
-    return [...this.#missedShots];
+    return this.#missedShots.map((shot) => [...shot]);
   }
 
   get shipPos() {
