@@ -98,9 +98,6 @@ describe('Gameboard', () => {
     gameboard.receiveAttack([0, 1]);
     expect(gameboard.coordinates[0][1].hit).toBe(true);
 
-    // Ensure the correct amount of missed shots have been tracked
-    expect(gameboard.missedShots.length).toBe(2);
-
     // Try to attack coordinates that have already been hit
     expect(() => gameboard.receiveAttack([0, 0])).toThrow();
   });

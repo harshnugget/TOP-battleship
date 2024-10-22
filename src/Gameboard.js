@@ -1,11 +1,9 @@
 class Gameboard {
   #coordinates;
-  #missedShots;
   #shipPos;
 
   constructor(size) {
     this.#coordinates = [];
-    this.#missedShots = [];
     this.#shipPos = new Map(); // Keeps track of ship coordinates
 
     this.createBoard(size); // Initialize a size*size board
@@ -13,10 +11,6 @@ class Gameboard {
 
   get coordinates() {
     return this.#coordinates.map((row) => row.map((cell) => ({ ...cell })));
-  }
-
-  get missedShots() {
-    return this.#missedShots.map((shot) => [...shot]);
   }
 
   get shipPos() {
@@ -31,7 +25,6 @@ class Gameboard {
 
     // Clear current board data
     this.#coordinates = [];
-    this.#missedShots = [];
     this.#shipPos.clear();
 
     // Initialize each coordinate as an object that contains values for a ship and a hit
@@ -53,7 +46,7 @@ class Gameboard {
       col < 0 ||
       col > this.#coordinates[0].length - 1
     ) {
-      throw Error('Coordinates out of bounds!');
+      throw RangeError('Coordinates out of bounds!');
     }
 
     if (this.#coordinates[row][col].hit === true) {
@@ -126,6 +119,15 @@ class Gameboard {
   receiveAttack(coordinates) {
     const row = coordinates[0];
     const col = coordinates[1];
+
+    try {
+      this.validateCoordinates(coordinates, true);
+    } catch (error) {
+      if (error instanceof RangeError) {
+        throw error;
+      }
+    }
+
     const ship = this.#coordinates[row][col].ship;
 
     if (this.#coordinates[row][col].hit === true) {
@@ -139,7 +141,6 @@ class Gameboard {
       return true;
     }
 
-    this.#missedShots.push([row, col]);
     return false;
   }
 
