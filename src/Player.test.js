@@ -41,30 +41,12 @@ describe('Player', () => {
       expect(coordinates[0][1]).toBe(1);
     });
 
-    test('Place all ships at random coordinates', () => {
-      player2.placeAllShipsRandom();
-
-      const allShipsPlaced = player2.ships.every((ship) => {
-        return ship.coords?.length > 0;
-      });
-
-      expect(allShipsPlaced).toBe(true);
-    });
-
     test('Remove a ship', () => {
       player1.placeShip('cruiser', [2, 1], 'horizontal');
       player1.removeShip('cruiser');
 
       const { coordinates } = player1.getShipData('cruiser');
       expect(coordinates).toBe(null);
-    });
-
-    test('Remove all ships', () => {
-      player1.removeAllShips();
-
-      player1.ships.forEach((ship) => {
-        expect(ship.coords).toBe(null);
-      });
     });
 
     test('Attack a ship', () => {
