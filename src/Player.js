@@ -99,6 +99,30 @@ class Player {
       ship.reset();
     });
   }
+
+  printBoard() {
+    const coords = this.#gameboard.coordinates;
+
+    // Print column headers
+    const header = Array.from({ length: coords.length }, (_, i) => i).join(' ');
+    console.log('    ' + header); // Adding space for row headers
+
+    // Print each row with row index
+    coords.forEach((row, rowIndex) => {
+      const rowRepresentation = row
+        .map((cell) => {
+          if (cell.hit) {
+            return cell.ship ? 'X' : 'M'; // 'X' for hit ship, 'M' for missed shot
+          } else {
+            return 'O'; // 'O' for unhit coordinates
+          }
+        })
+        .join(' ');
+
+      // Print the row index followed by its representation
+      console.log(coords.length - rowIndex - 1 + ' | ' + rowRepresentation);
+    });
+  }
 }
 
 export default Player;
