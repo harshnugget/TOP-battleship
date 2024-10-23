@@ -153,6 +153,59 @@ class Gameboard {
     // Returns true if all ships are sunk
     return ships.every((ship) => ship.isSunk);
   }
+
+  placeShipRandom(ship) {
+    const unoccupiedCoords = [];
+
+    // Get all unoccupied coordinates
+    this.#coordinates.forEach((row, rowIndex) => {
+      row.forEach((_, colIndex) => {
+        if (
+          this.#coordinates[rowIndex][colIndex].ship === null &&
+          this.#coordinates[rowIndex][colIndex].hit === false
+        ) {
+          unoccupiedCoords.push([rowIndex, colIndex]);
+        }
+      });
+    });
+
+    // Helper function to attempt placing the ship at a coordinate with a randomly selected orientation
+    const attemptPlacement = (coords) => {
+      const orientations = ['vertical', 'horizontal'];
+      let randomOrientation = orientations[Math.floor(Math.random() * orientations.length)];
+
+      for (let i = 0; i < orientations.length; i++) {
+        try {
+          this.placeShip(ship, coords, randomOrientation);
+          return true; // Successfully placed the ship
+        } catch (error) {
+          // Switch the orientation
+          randomOrientation = randomOrientation === 'vertical' ? 'horizontal' : 'vertical';
+        }
+      }
+
+      return false; // Could not place the ship
+    };
+
+    // Try placing the ship at random unoccupied coordinates
+    while (unoccupiedCoords.length > 0) {
+      const randomIndex = Math.floor(Math.random() * unoccupiedCoords.length);
+      const randomCoord = unoccupiedCoords[randomIndex];
+
+      if (attemptPlacement(randomCoord)) {
+        const placedAtCoords = this.#shipPos.get(ship);
+        const formattedCoords = placedAtCoords.map((coord) => `[${coord}]`).join(', ');
+        console.log(`Successfully placed ship at ${formattedCoords}`);
+        return; // Ship was placed successfully
+      } else {
+        // Remove the coordinate from unoccupiedCoords if placement failed
+        unoccupiedCoords.splice(randomIndex, 1);
+      }
+    }
+
+    // No valid placement was found
+    throw Error('Could not place the ship! No valid coordinates could be found');
+  }
 }
 
 export default Gameboard;

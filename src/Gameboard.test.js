@@ -156,4 +156,17 @@ describe('Gameboard', () => {
     // Remove a ship that doesn't exist on the board
     expect(() => gameboard.removeShip({})).toThrow();
   });
+
+  test('Random ship placement', () => {
+    const ship1 = mockShip(3);
+    const ship2 = mockShip(10);
+    const ship3 = mockShip(11);
+
+    gameboard.placeShipRandom(ship1);
+    gameboard.placeShipRandom(ship2);
+    expect(() => gameboard.placeShipRandom(ship3)).toThrow();
+
+    expect(gameboard.shipPos.get(ship1).length).toBe(3);
+    expect(gameboard.shipPos.get(ship2).length).toBe(10);
+  });
 });
