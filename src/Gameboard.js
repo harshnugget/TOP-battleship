@@ -103,6 +103,9 @@ class Gameboard {
     });
 
     this.#shipPos.set(ship, validCoordinates);
+
+    const formattedCoords = validCoordinates.map((coord) => `[${coord}]`).join(', ');
+    console.log(`Placed ship at ${formattedCoords}`);
   }
 
   removeShip(ship) {
@@ -114,6 +117,9 @@ class Gameboard {
 
     coordinatesToReset.forEach(([row, col]) => (this.#coordinates[row][col].ship = null));
     this.#shipPos.delete(ship);
+
+    const formattedCoords = coordinatesToReset.map((coord) => `[${coord}]`).join(', ');
+    console.log(`Removed ship at ${formattedCoords}`);
   }
 
   receiveAttack(coordinates) {
@@ -194,9 +200,6 @@ class Gameboard {
       const randomCoord = unoccupiedCoords[randomIndex];
 
       if (attemptPlacement(randomCoord)) {
-        const placedAtCoords = this.#shipPos.get(ship);
-        const formattedCoords = placedAtCoords.map((coord) => `[${coord}]`).join(', ');
-        console.log(`Successfully placed ship at ${formattedCoords}`);
         return; // Ship was placed successfully
       } else {
         // Remove the coordinate from unoccupiedCoords if placement failed
