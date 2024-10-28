@@ -72,10 +72,44 @@ class Player {
     this.#gameboard.placeShip(ship, coordinates, orientation);
   }
 
+  placeAllShipsRandom() {
+    const placedShips = [];
+
+    [...this.#ships].forEach(([type, ship]) => {
+      // Check if the ship already exists on the board
+      if (this.getShipData(type).coordinates?.length > 0) {
+        return true; // Ship is already placed, continue with the next one
+      }
+
+      try {
+        // Attempt to place the ship
+        this.#gameboard.placeShipRandom(ship);
+        placedShips.push(ship);
+        return true; // Successfully placed
+      } catch (error) {
+        console.error(error.message);
+
+        // Roll back any successful placements in this attempt
+        placedShips.forEach((placedShip) => this.#gameboard.removeShip(placedShip));
+        return false; // Stop further placement attempts
+      }
+    });
+  }
+
   removeShip(type) {
     const ship = this.#ships.get(type);
 
     this.#gameboard.removeShip(ship);
+  }
+
+  removeAllShips() {
+    [...this.#ships.keys()].forEach((type) => {
+      const ship = this.getShipData(type);
+
+      if (ship.coordinates?.length > 0) {
+        this.removeShip(type);
+      }
+    });
   }
 
   attack(coordinates) {
@@ -111,7 +145,7 @@ class Player {
     coords.forEach((row, rowIndex) => {
       const rowRepresentation = row
         .map((cell) => {
-          if (cell.hit) {
+          if (cell.ship || cell.hit) {
             return cell.ship ? 'X' : 'M'; // 'X' for hit ship, 'M' for missed shot
           } else {
             return 'O'; // 'O' for unhit coordinates
