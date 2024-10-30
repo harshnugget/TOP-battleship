@@ -12,7 +12,7 @@ const createGameboardElement = (cellSize, rows, columns) => {
   const createCellContainer = () => {
     const element = document.createElement('div');
     element.classList.add('cell');
-    element.style.border = '1px solid #0000FF';
+    element.style.border = '1px solid black';
     return element;
   };
 
@@ -151,8 +151,10 @@ class GameboardUI {
     allCells.forEach((cell) => {
       if (cell.classList.contains('placeholder')) {
         cell.style.backgroundColor = 'grey';
+      } else if (cell.classList.contains('ship-cell') && cell.classList.contains('hit-cell')) {
+        cell.style.backgroundColor = 'darkblue';
       } else if (cell.classList.contains('ship-cell')) {
-        cell.style.backgroundColor = 'green';
+        cell.style.backgroundColor = 'blue';
       } else if (cell.classList.contains('hit-cell')) {
         cell.style.backgroundColor = 'red';
       } else {

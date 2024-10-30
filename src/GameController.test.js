@@ -4,6 +4,20 @@ import Player from './Player';
 describe('Game Controller', () => {
   let controller, player1, player2;
 
+  const getPlayerShips = (player) => {
+    return player.ships;
+  };
+
+  const getShipData = (ship) => {
+    const type = ship?.type || null;
+    const hits = ship?.hits || null;
+    const length = ship?.length || null;
+    const orientation = ship?.orientation || null;
+    const coordinates = ship?.coordinates || null;
+
+    return { type, hits, length, orientation, coordinates };
+  };
+
   beforeAll(() => {
     player1 = new Player('Player 1');
     player2 = new Player('Player 2');
@@ -16,11 +30,12 @@ describe('Game Controller', () => {
 
     // Place all players ships on their board
     [player1, player2].forEach((player) => {
-      player.ships.forEach((ship, index) => {
+      [...getPlayerShips(player)].forEach((ship, index) => {
         const row = index;
         const col = 0;
 
-        player.placeShip(ship.type, [row, col]);
+        const shipData = getShipData(ship);
+        player.placeShip(shipData.type, [row, col]);
       });
     });
 
@@ -38,13 +53,14 @@ describe('Game Controller', () => {
 
   describe('Attacking', () => {
     test('Attempt to attack when not all ships are placed', () => {
-      const shipData = controller.player2.ships[0];
+      const player2Ship = getPlayerShips(player2)[0];
+      const { type, coordinates } = getShipData(player2Ship);
 
-      controller.player2.removeShip(shipData.type);
+      controller.player2.removeShip(type);
 
       expect(() => controller.attack([0, 0])).toThrow();
 
-      controller.player2.placeShip(shipData.type, shipData.coords[0]);
+      controller.player2.placeShip(type, coordinates[0]);
     });
 
     test('Missed a target', () => {
@@ -66,7 +82,6 @@ describe('Game Controller', () => {
     });
 
     test('Hit a target', () => {
-      console.log(player1.ships);
       expect(controller.attack([1, 0])).toBe(true);
       expect(controller.attack([1, 1])).toBe(true);
 
@@ -85,9 +100,11 @@ describe('Game Controller', () => {
 
       // Get coordinates of player2's ships
       const shipCoordinates = [];
+      const player2Ships = getPlayerShips(player2);
 
-      controller.player2.ships.forEach((ship) => {
-        ship.coords.forEach((coord) => shipCoordinates.push(coord));
+      [...player2Ships].forEach((ship) => {
+        const { coordinates } = getShipData(ship);
+        coordinates.forEach((coord) => shipCoordinates.push(coord));
       });
 
       // Sink all of player2's ships until player2 wins

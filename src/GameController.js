@@ -38,7 +38,7 @@ class GameController {
     [this.player1, this.player2].every((player) =>
       player.ships.every((ship) => {
         try {
-          return ship.coords.length > 0;
+          return ship.coordinates.length > 0;
         } catch (error) {
           throw Error(`All ships must be have valid coordinates.`);
         }
