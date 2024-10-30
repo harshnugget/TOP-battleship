@@ -4,7 +4,7 @@ class Gameboard {
 
   constructor(size) {
     this.#coordinates = [];
-    this.#shipPos = new Map(); // Keeps track of ship coordinates
+    this.#shipPos = new Map(); // Keeps track of ship positioning
 
     this.createBoard(size); // Initialize a size*size board
   }
@@ -102,23 +102,26 @@ class Gameboard {
       this.#coordinates[row][col].ship = ship;
     });
 
-    this.#shipPos.set(ship, validCoordinates);
+    this.#shipPos.set(ship, { orientation: orientation, coordinates: validCoordinates });
 
     const formattedCoords = validCoordinates.map((coord) => `[${coord}]`).join(', ');
     console.log(`Placed ship at ${formattedCoords}`);
   }
 
   removeShip(ship) {
-    const coordinatesToReset = this.#shipPos.get(ship);
+    const positionData = this.#shipPos.get(ship);
 
-    if (!coordinatesToReset) {
+    if (!positionData) {
       throw Error('This ship does not exist on the board!');
     }
 
-    coordinatesToReset.forEach(([row, col]) => (this.#coordinates[row][col].ship = null));
+    [...positionData.coordinates].forEach(
+      ([row, col]) => (this.#coordinates[row][col].ship = null)
+    );
+
     this.#shipPos.delete(ship);
 
-    const formattedCoords = coordinatesToReset.map((coord) => `[${coord}]`).join(', ');
+    const formattedCoords = positionData.coordinates.map((coord) => `[${coord}]`).join(', ');
     console.log(`Removed ship at ${formattedCoords}`);
   }
 

@@ -61,7 +61,7 @@ describe('Gameboard', () => {
     expect(gameboard.coordinates[0][2].ship).toBe(ship);
     expect(gameboard.coordinates[0][3].ship).not.toBe(ship);
 
-    expect(gameboard.shipPos.get(ship).length).toBe(2);
+    expect(gameboard.shipPos.get(ship).coordinates.length).toBe(2);
 
     // Attempt to place a ship that overflows bounds
     expect(() => gameboard.placeShip(mockShip(3), [1, 8], 'horizontal')).toThrow('out of bounds');
@@ -76,7 +76,7 @@ describe('Gameboard', () => {
     expect(gameboard.coordinates[2][0].ship).toBe(ship);
     expect(gameboard.coordinates[1][0].ship).not.toBe(ship);
 
-    expect(gameboard.shipPos.get(ship).length).toBe(2);
+    expect(gameboard.shipPos.get(ship).coordinates.length).toBe(2);
 
     // Attempt to place a ship that overflows bounds
     expect(() => gameboard.placeShip(mockShip(5), [3, 1], 'vertical')).toThrow('out of bounds');
@@ -163,7 +163,7 @@ describe('Gameboard', () => {
     gameboard.placeShipRandom(ship2);
     expect(() => gameboard.placeShipRandom(ship3)).toThrow();
 
-    expect(gameboard.shipPos.get(ship1).length).toBe(3);
-    expect(gameboard.shipPos.get(ship2).length).toBe(10);
+    expect(gameboard.shipPos.get(ship1).coordinates.length).toBe(3);
+    expect(gameboard.shipPos.get(ship2).coordinates.length).toBe(10);
   });
 });
