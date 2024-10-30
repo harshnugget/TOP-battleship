@@ -21,7 +21,7 @@ describe('Player', () => {
 
   describe('Placing, removing and attacking ships', () => {
     const removeShipsFromBoard = (player) => {
-      let shipsOnBoard = player.ships.filter((ship) => ship.coords !== null);
+      let shipsOnBoard = player.ships.filter((ship) => ship.coordinates !== null);
 
       if (shipsOnBoard) {
         shipsOnBoard.forEach((ship) => {
@@ -45,7 +45,7 @@ describe('Player', () => {
       player2.placeAllShipsRandom();
 
       const allShipsPlaced = player2.ships.every((ship) => {
-        return ship.coords?.length > 0;
+        return ship.coordinates?.length > 0;
       });
 
       expect(allShipsPlaced).toBe(true);
@@ -63,7 +63,7 @@ describe('Player', () => {
       player1.removeAllShips();
 
       player1.ships.forEach((ship) => {
-        expect(ship.coords).toBe(null);
+        expect(ship.coordinates).toBe(null);
       });
     });
 
@@ -105,7 +105,7 @@ describe('Player', () => {
   test('Resetting', () => {
     player1.placeShip('submarine', [4, 4], 'horizontal');
 
-    let shipsOnBoard = player1.ships.filter((ship) => ship.coords !== null);
+    let shipsOnBoard = player1.ships.filter((ship) => ship.coordinates !== null);
 
     expect(shipsOnBoard.length).toBeGreaterThanOrEqual(1);
     expect(player1.opponent).not.toBe(null);
@@ -113,7 +113,7 @@ describe('Player', () => {
     // Reset player data
     player1.reset();
 
-    shipsOnBoard = player1.ships.filter((ship) => ship.coords !== null);
+    shipsOnBoard = player1.ships.filter((ship) => ship.coordinates !== null);
     expect(shipsOnBoard.length).toBe(0);
     expect(player1.opponent).toBe(null);
   });

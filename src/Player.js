@@ -37,9 +37,7 @@ class Player {
 
   get ships() {
     return Array.from(this.#ships.keys()).map((key) => {
-      const shipObj = this.#ships.get(key);
-      const coords = this.#gameboard.shipPos.get(shipObj) || null;
-      return { type: key, coords };
+      return this.getShipData(key);
     });
   }
 
@@ -55,13 +53,15 @@ class Player {
 
   getShipData(type) {
     const ship = this.#ships.get(type);
-    const coordinates = this.#gameboard.shipPos.get(ship) || null;
+    const coordinates = this.#gameboard.shipPos.get(ship)?.coordinates || null;
+    const orientation = this.#gameboard.shipPos.get(ship)?.orientation || null;
 
     return {
       type: type,
       length: ship.length,
       hits: ship.hits,
       isSunk: ship.isSunk,
+      orientation: orientation,
       coordinates: coordinates,
     };
   }
