@@ -1,4 +1,4 @@
-import Gameboard from './Gameboard';
+import Gameboard from '../Gameboard';
 import { jest } from '@jest/globals';
 
 describe('Gameboard', () => {

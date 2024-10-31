@@ -1,5 +1,5 @@
-import GameController from './GameController';
-import Player from './Player';
+import GameController from '../GameController';
+import Player from '../Player';
 
 describe('Game Controller', () => {
   let controller, player1, player2;
