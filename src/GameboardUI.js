@@ -8,6 +8,10 @@ const createGameboardElement = (cellSize, rows, columns) => {
   element.style.display = 'grid';
   element.style.gridTemplateColumns = `repeat(${columns}, ${cellSize}px)`;
   element.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+  element.style.border = '1px solid black';
+  element.style.width = 'max-content';
+  element.style.height = 'max-content';
+  element.style.gap = '2px';
 
   const createCellContainer = () => {
     const element = document.createElement('div');
@@ -35,6 +39,14 @@ class GameboardUI {
   #columns;
   #gameboardElement;
 
+  static cellColours = {
+    placeholder: 'grey',
+    hit: 'red',
+    ship: 'blue',
+    hitShip: 'dark-blue',
+    empty: '',
+  };
+
   constructor(parentContainer, cellSize = 40, rows = 10, columns = 10) {
     this.#parentContainer = parentContainer;
     this.#cellSize = cellSize;
@@ -50,6 +62,10 @@ class GameboardUI {
 
   get cellSize() {
     return this.#cellSize;
+  }
+
+  get gameboardElement() {
+    return this.#gameboardElement;
   }
 
   getCell(coordinates) {
@@ -84,7 +100,7 @@ class GameboardUI {
       cell.classList.add('hit-cell');
     }
 
-    this.updateCells();
+    this.updateCells(GameboardUI.cellColours);
     return cell;
   }
 
@@ -104,7 +120,7 @@ class GameboardUI {
       throw new Error('Invalid ship placement');
     }
 
-    this.updateCells();
+    this.updateCells(GameboardUI.cellColours);
     return cells;
   }
 
@@ -122,7 +138,7 @@ class GameboardUI {
       cell.classList.add('placeholder');
     });
 
-    this.updateCells();
+    this.updateCells(GameboardUI.cellColours);
     return cells;
   }
 
@@ -145,23 +161,24 @@ class GameboardUI {
     }
   }
 
-  updateCells() {
+  updateCells(colours = { placeholder, hit, ship, hitShip, empty }) {
     const allCells = this.#gameboardElement.querySelectorAll('.cell');
 
     allCells.forEach((cell) => {
       if (cell.classList.contains('placeholder')) {
-        cell.style.backgroundColor = 'grey';
+        cell.style.backgroundColor = colours.placeholder;
       } else if (cell.classList.contains('ship-cell') && cell.classList.contains('hit-cell')) {
-        cell.style.backgroundColor = 'darkblue';
+        cell.style.backgroundColor = colours.hitShip;
       } else if (cell.classList.contains('ship-cell')) {
-        cell.style.backgroundColor = 'blue';
+        cell.style.backgroundColor = colours.ship;
       } else if (cell.classList.contains('hit-cell')) {
-        cell.style.backgroundColor = 'red';
+        cell.style.backgroundColor = colours.hit;
       } else {
-        cell.style.backgroundColor = '';
+        cell.style.backgroundColor = colours.empty;
       }
     });
   }
 }
 
 export default GameboardUI;
+export { createGameboardElement };
