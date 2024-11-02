@@ -75,21 +75,56 @@ class GameboardUI {
     );
   }
 
-  traverseCells(startCoordinates, range, orientation, callback) {
+  getAllCells() {
+    return this.#gameboardElement.querySelectorAll('.cell');
+  }
+
+  traverseCells(startCoordinates, orientation, callback, limit = this.#rows * this.#columns) {
+    if (limit < 1 || limit > this.#rows * this.#columns) {
+      return console.error(`Limit must be between 1 and ${this.#rows * this.#columns}.`);
+    }
+
+    const [startRow, startCol] = startCoordinates;
+
     const cells = [];
-    let [startRow, startCol] = startCoordinates;
+    let i = 0;
 
-    for (let i = 0; i < range; i++) {
-      const currentRow = orientation === 'horizontal' ? startRow : startRow - i;
-      const currentCol = orientation === 'horizontal' ? startCol + i : startCol;
-      const cell = this.getCell([currentRow, currentCol]);
+    if (orientation === 'vertical') {
+      // Traverses from top right to bottom left
+      for (let col = this.#columns - 1; col >= 0; col--) {
+        for (let row = this.#rows - 1; row >= 0; row--) {
+          if ((row > startRow && col === startCol) || col > startCol) {
+            continue;
+          }
 
-      if (cell) cells.push(cell);
+          if (i < limit) {
+            const cell = this.getCell([row, col]);
+            cells.push(cell);
+            i++;
+          }
+        }
+      }
+    } else if (orientation === 'horizontal') {
+      // Traverses from bottom left to top right
+      for (let row = 0; row < this.#rows; row++) {
+        for (let col = 0; col < this.#columns; col++) {
+          if ((col < startCol && row === startRow) || row < startRow) {
+            continue;
+          }
+
+          if (i < limit) {
+            const cell = this.getCell([row, col]);
+            cells.push(cell);
+            i++;
+          }
+        }
+      }
+    } else {
+      throw new Error(`Orientation must be "vertical" or "horizontal"`);
     }
 
     // Apply the callback to each cell
     cells.forEach(callback);
-
     return cells;
   }
 
@@ -109,13 +144,18 @@ class GameboardUI {
 
     // Validate ship placement
     if (this.isValidPlacement(coordinates, length, orientation)) {
-      cells = this.traverseCells(coordinates, length, orientation, (cell) => {
-        if (remove) {
-          cell.classList.remove('ship-cell');
-        } else {
-          cell.classList.add('ship-cell');
-        }
-      });
+      cells = this.traverseCells(
+        coordinates,
+        orientation,
+        (cell) => {
+          if (remove) {
+            cell.classList.remove('ship-cell');
+          } else {
+            cell.classList.add('ship-cell');
+          }
+        },
+        length
+      );
     } else {
       throw new Error('Invalid ship placement');
     }
@@ -134,9 +174,14 @@ class GameboardUI {
       cell.classList.remove('placeholder');
     });
 
-    cells = this.traverseCells(coordinates, length, orientation, (cell) => {
-      cell.classList.add('placeholder');
-    });
+    cells = this.traverseCells(
+      coordinates,
+      orientation,
+      (cell) => {
+        cell.classList.add('placeholder');
+      },
+      length
+    );
 
     this.updateCells(GameboardUI.cellColours);
     return cells;
