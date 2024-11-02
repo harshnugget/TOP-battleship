@@ -31,9 +31,9 @@ class ShipUI {
   #ships;
 
   constructor(parentContainer, gameboardUI) {
-    this.#parentContainer = parentContainer;
+    this.#parentContainer = parentContainer; // Stores unplaced ship elements
     this.#gameboardUI = gameboardUI;
-    this.#ships = new Map();
+    this.#ships = new Map(); // Store references to ship elements by type
   }
 
   get parentContainer() {
@@ -49,23 +49,30 @@ class ShipUI {
   }
 
   createShip(type, length) {
-    // Get properties of the gameboard element
+    // Get properties/styles of the gameboard element
     const cellSize = this.#gameboardUI.cellSize;
-    const borderProperties = getComputedStyle(this.#gameboardUI.getCell([0, 0])).border;
+    const borderStyles = getComputedStyle(this.#gameboardUI.getCell([0, 0])).border;
     const gapSize = getComputedStyle(this.#gameboardUI.gameboardElement).gap;
 
-    const element = createShipElement(length, cellSize);
+    // Create the ship element and apply properties/styles
+    const shipElement = createShipElement(length, cellSize);
+    shipElement.dataset.type = type;
 
-    element.style.gap = gapSize;
-
-    element.querySelectorAll('.ship-cell').forEach((cell) => {
-      cell.style.border = borderProperties;
+    shipElement.style.gap = gapSize;
+    shipElement.querySelectorAll('.ship-cell').forEach((cell) => {
+      cell.style.border = borderStyles;
     });
 
-    element.dataset.type = type;
+    // Store the ship type as a reference to the element and orientation (default to horizontal);
+    this.#ships.set(type, { element: shipElement, orientation: 'horizontal' });
 
-    this.#parentContainer.append(element);
-    this.#ships.set(type, { element: element, orientation: 'horizontal' });
+    // Create a container for the ship element by it's type
+    const container = document.createElement('div');
+    container.classList.add(`${type}-container`);
+    container.append(shipElement);
+
+    // Append the container to the shipUI parent element
+    this.#parentContainer.append(container);
   }
 
   flipOrientation(type) {
@@ -90,8 +97,11 @@ class ShipUI {
     }
 
     const cell = this.#gameboardUI.getCell(coordinates);
-    const ship = this.#ships.get(type);
-    const element = ship.element;
+    const { element, orientation: shipOrientation } = this.#ships.get(type);
+
+    if (orientation !== shipOrientation) {
+      this.flipOrientation(type);
+    }
 
     // Get the top-left border & padding values of the cell
     const computedStyle = getComputedStyle(cell);
@@ -111,23 +121,20 @@ class ShipUI {
     element.style.position = 'absolute';
 
     cell.append(element);
-
-    if (orientation !== ship.orientation) {
-      this.flipOrientation(type);
-    }
   }
 
   resetShip(type) {
-    const ship = this.#ships.get(type);
-    const element = ship.element;
-    const orientation = ship.orientation;
+    const { element, orientation } = this.#ships.get(type);
 
     if (orientation !== 'horizontal') {
       this.flipOrientation(type);
     }
 
     element.style.position = '';
-    this.#parentContainer.append(element);
+
+    // Get the container by type and re-append the ship element
+    const container = this.#parentContainer.querySelector(`.${type}-container`);
+    container.append(element);
   }
 }
 
