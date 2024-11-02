@@ -35,4 +35,37 @@ describe('Ship', () => {
     ship.hit(); // Sink the ship with one hit
     expect(() => ship.hit()).toThrow('Cannot hit a ship that is already sunk!');
   });
+
+  test('Setting coordinates', () => {
+    const ship = new Ship(2);
+
+    // Invalid coordinate range
+    expect(() => (ship.coordinates = [])).toThrow();
+    expect(() => (ship.coordinates = [[0, 0]])).toThrow();
+    expect(
+      () =>
+        (ship.coordinates = [
+          [0, 0],
+          [0, 1],
+          [0, 2],
+        ])
+    ).toThrow();
+
+    // Valid coordinate range
+    expect(
+      () =>
+        (ship.coordinates = [
+          [0, 0],
+          [0, 1],
+        ])
+    ).not.toThrow();
+  });
+
+  test('Setting orientation', () => {
+    const ship = new Ship(2);
+
+    expect(ship.orientation).toBe('horizontal');
+    ship.orientation = 'vertical';
+    expect(ship.orientation).toBe('vertical');
+  });
 });
