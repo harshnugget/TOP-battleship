@@ -1,33 +1,18 @@
 class Gameboard {
+  #size;
   #coordinates;
-  #shipPos;
 
-  constructor(size) {
+  constructor(size, ships = []) {
+    this.#size = size;
     this.#coordinates = [];
-    this.#shipPos = new Map(); // Keeps track of ship positioning
+    this.ships = ships;
 
-    this.createBoard(size); // Initialize a size*size board
-  }
-
-  get coordinates() {
-    return this.#coordinates.map((row) => row.map((cell) => ({ ...cell })));
-  }
-
-  get shipPos() {
-    return new Map(this.#shipPos);
-  }
-
-  createBoard(size) {
     // Validate size (must be a positive integer)
     if (!Number.isInteger(size) || size <= 0) {
       throw new Error('Invalid board size! Must be a positive integer.');
     }
 
-    // Clear current board data
-    this.#coordinates = [];
-    this.#shipPos.clear();
-
-    // Initialize each coordinate as an object that contains values for a ship and a hit
+    // Initialize each coordinate as an object (cell) that contains values for a ship and a hit
     for (let row = 0; row < size; row++) {
       this.#coordinates.push([]);
       for (let column = 0; column < size; column++) {
@@ -36,65 +21,91 @@ class Gameboard {
     }
   }
 
-  validateCoordinates(coordinates) {
-    const row = coordinates[0];
-    const col = coordinates[1];
-
-    if (
-      row < 0 ||
-      row > this.#coordinates.length - 1 ||
-      col < 0 ||
-      col > this.#coordinates[0].length - 1
-    ) {
-      throw RangeError('Coordinates out of bounds!');
-    }
-
-    if (this.#coordinates[row][col].hit === true) {
-      throw Error('These coordinates have already been attacked!');
-    }
-
-    if (this.#coordinates[row][col].ship !== null) {
-      throw Error('These coordinates are already occupied!');
-    }
+  get size() {
+    return this.#size;
   }
 
-  placeShip(ship, coordinates, orientation) {
-    // Check that the ship isn't already on the board
-    if (this.#shipPos.get(ship)) {
-      throw Error(
-        `This ship already exists on the board! Remove the ship before placing it again.`
-      );
-    }
+  get coordinates() {
+    // Return a deep copy of the coordinates array
+    return this.#coordinates.map((row) => row.map((cell) => ({ ...cell })));
+  }
 
-    const startRow = coordinates[0];
-    const startCol = coordinates[1];
+  resetBoard() {
+    // Reset each ship to its default values
+    this.ships.forEach((ship) => ship.reset());
+
+    // Reset each coordinate/cell to its default values
+    this.#coordinates.forEach((row) => {
+      row.forEach((col) => {
+        col.ship = null;
+        col.hit = null;
+      });
+    });
+  }
+
+  isWithinBoundsAt([row, col]) {
+    const gameboardSize = this.#size;
+
+    return row >= 0 && row < gameboardSize && col >= 0 && col < gameboardSize;
+  }
+
+  isHitAt([row, col]) {
+    return this.#coordinates[row][col].hit === true;
+  }
+
+  isEmptyAt([row, col]) {
+    return this.#coordinates[row][col].ship === null;
+  }
+
+  hasShip(ship) {
+    return !this.ships.includes(ship);
+  }
+
+  placeShip(ship, [row, col], orientation) {
     const validCoordinates = []; // Coordinates the ship will occupy
 
-    const storeValidCoordinates = (row, col) => {
-      try {
-        this.validateCoordinates([row, col]);
-        validCoordinates.push([row, col]);
-      } catch (error) {
-        throw Error(`Could not place the ship!\n${error.message}`);
+    // Reset the ship before placing
+    this.resetShip(ship);
+
+    const validateCoordinates = ([row, col]) => {
+      if (!this.isWithinBoundsAt([row, col])) {
+        throw new Error('Could not place the ship!\nThese coordinates are out of bounds.');
+      }
+
+      if (this.isHitAt([row, col])) {
+        throw new Error('Could not place the ship!\nThese coordinates already been attacked.');
+      }
+
+      if (!this.isEmptyAt([row, col])) {
+        throw new Error('Could not place the ship!\nThese coordinates are already occupied.');
       }
     };
 
     if (orientation === 'horizontal') {
-      const endCol = startCol + ship.length;
+      const endCol = col + ship.length;
 
       // Increment columns until greater than endCol
-      for (let currentCol = startCol; currentCol < endCol; currentCol++) {
-        storeValidCoordinates(startRow, currentCol);
+      for (let currentCol = col; currentCol < endCol; currentCol++) {
+        validateCoordinates([row, currentCol]);
+        validCoordinates.push([row, currentCol]);
       }
     } else if (orientation === 'vertical') {
-      const endRow = startRow - ship.length;
+      const endRow = row - ship.length;
 
       // Decrement rows until less than endRow
-      for (let currentRow = startRow; currentRow > endRow; currentRow--) {
-        storeValidCoordinates(currentRow, startCol);
+      for (let currentRow = row; currentRow > endRow; currentRow--) {
+        validateCoordinates([currentRow, col]);
+        validCoordinates.push([currentRow, col]);
       }
     } else {
-      throw Error('Invalid orientation! Must be either vertical or horizontal');
+      throw new Error(
+        `Invalid orientation: ${orientation}\nMust be either "vertical" or "horizontal"`
+      );
+    }
+
+    // Add the ship to the ships array if it doesn't already exist
+    if (this.hasShip(ship)) {
+      this.ships.push(ship);
     }
 
     // Assign the ship to each validated coordinate
@@ -102,62 +113,63 @@ class Gameboard {
       this.#coordinates[row][col].ship = ship;
     });
 
-    this.#shipPos.set(ship, { orientation: orientation, coordinates: validCoordinates });
-
-    const formattedCoords = validCoordinates.map((coord) => `[${coord}]`).join(', ');
-    console.log(`Placed ship at ${formattedCoords}`);
+    ship.orientation = orientation;
+    ship.coordinates = validCoordinates;
   }
 
-  removeShip(ship) {
-    const positionData = this.#shipPos.get(ship);
+  resetShip(ship) {
+    const coordinates = ship.coordinates;
 
-    if (!positionData) {
-      throw Error('This ship does not exist on the board!');
+    if (coordinates?.length > 0) {
+      // Reset gameboard coordinates, occupied by the ship, to defaults
+      coordinates.forEach((coord) => {
+        const [row, col] = coord;
+        this.#coordinates[row][col].ship = null;
+        this.#coordinates[row][col].hit = false;
+      });
     }
 
-    [...positionData.coordinates].forEach(
-      ([row, col]) => (this.#coordinates[row][col].ship = null)
-    );
-
-    this.#shipPos.delete(ship);
-
-    const formattedCoords = positionData.coordinates.map((coord) => `[${coord}]`).join(', ');
-    console.log(`Removed ship at ${formattedCoords}`);
+    ship.reset();
   }
 
-  receiveAttack(coordinates) {
-    const row = coordinates[0];
-    const col = coordinates[1];
+  receiveAttack([row, col]) {
+    if (!this.isWithinBoundsAt([row, col])) {
+      throw new RangeError('These coordinates are out of bounds!');
+    }
 
-    try {
-      this.validateCoordinates(coordinates, true);
-    } catch (error) {
-      if (error instanceof RangeError) {
-        throw error;
-      }
+    if (this.isHitAt([row, col])) {
+      throw new Error('These coordinates have already been attacked!');
     }
 
     const ship = this.#coordinates[row][col].ship;
-
-    if (this.#coordinates[row][col].hit === true) {
-      throw Error('These coordinates have already been hit!');
-    }
 
     this.#coordinates[row][col].hit = true;
 
     if (ship !== null) {
       ship.hit();
-      return true;
+      return true; // Return true if a ship was hit
     }
 
-    return false;
+    return false; // Return false if a ship was not hit
+  }
+
+  allShipsPlaced() {
+    // Flatten the coordinates array
+    const flatCoordinates = this.#coordinates.flat();
+
+    // Extract only the ships in the coordinates array
+    const placedShips = flatCoordinates
+      .filter(({ ship }) => ship !== null) // Filter coordinates with non-null ships
+      .map(({ ship }) => ship); // Map only the ship object
+
+    return this.ships.every((ship) => placedShips.includes(ship));
   }
 
   allShipsSunk() {
-    const ships = Array.from(this.#shipPos.keys());
+    const ships = this.ships;
 
     if (ships.length === 0) {
-      throw Error('Cannot check for sunk ships! There are no ships on the board.');
+      throw new Error('Cannot check for sunk ships!\nThere are no ships on the board.');
     }
 
     // Returns true if all ships are sunk
@@ -167,13 +179,10 @@ class Gameboard {
   placeShipRandom(ship) {
     const unoccupiedCoords = [];
 
-    // Get all unoccupied coordinates
     this.#coordinates.forEach((row, rowIndex) => {
       row.forEach((_, colIndex) => {
-        if (
-          this.#coordinates[rowIndex][colIndex].ship === null &&
-          this.#coordinates[rowIndex][colIndex].hit === false
-        ) {
+        // Check that the cell has no ship and hasn't been hit
+        if (this.isEmptyAt([rowIndex, colIndex]) && !this.isHitAt([rowIndex, colIndex])) {
           unoccupiedCoords.push([rowIndex, colIndex]);
         }
       });
@@ -188,7 +197,7 @@ class Gameboard {
         try {
           this.placeShip(ship, coords, randomOrientation);
           return true; // Successfully placed the ship
-        } catch (error) {
+        } catch {
           // Switch the orientation
           randomOrientation = randomOrientation === 'vertical' ? 'horizontal' : 'vertical';
         }
@@ -202,16 +211,16 @@ class Gameboard {
       const randomIndex = Math.floor(Math.random() * unoccupiedCoords.length);
       const randomCoord = unoccupiedCoords[randomIndex];
 
-      if (attemptPlacement(randomCoord)) {
-        return; // Ship was placed successfully
-      } else {
-        // Remove the coordinate from unoccupiedCoords if placement failed
+      if (!attemptPlacement(randomCoord)) {
+        // Remove the coordinate from unoccupied coordinates
         unoccupiedCoords.splice(randomIndex, 1);
+      } else {
+        return true;
       }
     }
 
     // No valid placement was found
-    throw Error('Could not place the ship! No valid coordinates could be found');
+    throw new Error('Could not place the ship!\nNo valid coordinates could be found.');
   }
 }
 

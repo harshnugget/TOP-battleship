@@ -9,11 +9,16 @@ describe('Gameboard', () => {
     return {
       length,
       hits: 0,
+      coordinates: [],
       get isSunk() {
         return this.hits >= this.length;
       },
       hit: jest.fn().mockImplementation(function () {
         this.hits++;
+      }),
+      reset: jest.fn().mockImplementation(function () {
+        this.hits = 0;
+        this.coordinates = [];
       }),
     };
   };
@@ -22,14 +27,14 @@ describe('Gameboard', () => {
     gameboard = new Gameboard(10); // Create a new gameboard of size 10
   });
 
-  test('Create a gameboard with an invalid size', () => {
-    expect(() => gameboard.createBoard(-10)).toThrow();
-    expect(() => gameboard.createBoard('ten')).toThrow();
+  test.only('Create a gameboard with an invalid size', () => {
+    expect(() => new Gameboard(-10)).toThrow();
+    expect(() => new Gameboard('ten')).toThrow();
   });
 
-  test('Expected gameboard size', () => {
+  test.only('Expected gameboard size', () => {
     const checkSize = (size) => {
-      gameboard.createBoard(size);
+      const gameboard = new Gameboard(size);
       expect(gameboard.coordinates.length).toBe(size); // Number of rows
       expect(gameboard.coordinates[0].length).toBe(size); // Number of columns
     };
@@ -38,7 +43,7 @@ describe('Gameboard', () => {
     checkSize(10);
   });
 
-  test('Invalid coordinate boundaries', () => {
+  test.only('Invalid coordinate boundaries', () => {
     // Expect out of bounds coordinates to throw an error
     const outOfBounds = [
       [-1, 0],
@@ -52,44 +57,46 @@ describe('Gameboard', () => {
     });
   });
 
-  test('Placing a ship horizontally', () => {
+  test.only('Placing a ship horizontally', () => {
     const ship = mockShip(2);
 
     gameboard.placeShip(ship, [0, 1], 'horizontal');
+    expect(gameboard.ships.includes(ship)).toBe(true);
+
     expect(gameboard.coordinates[0][0].ship).not.toBe(ship);
     expect(gameboard.coordinates[0][1].ship).toBe(ship);
     expect(gameboard.coordinates[0][2].ship).toBe(ship);
     expect(gameboard.coordinates[0][3].ship).not.toBe(ship);
 
-    expect(gameboard.shipPos.get(ship).coordinates.length).toBe(2);
-
     // Attempt to place a ship that overflows bounds
     expect(() => gameboard.placeShip(mockShip(3), [1, 8], 'horizontal')).toThrow('out of bounds');
+    expect(ship.coordinates.length).toBe(2);
   });
 
-  test('Placing a ship vertically', () => {
+  test.only('Placing a ship vertically', () => {
     const ship = mockShip(2);
 
     gameboard.placeShip(ship, [3, 0], 'vertical');
+    expect(gameboard.ships.includes(ship)).toBe(true);
+
     expect(gameboard.coordinates[4][0].ship).not.toBe(ship);
     expect(gameboard.coordinates[3][0].ship).toBe(ship);
     expect(gameboard.coordinates[2][0].ship).toBe(ship);
     expect(gameboard.coordinates[1][0].ship).not.toBe(ship);
 
-    expect(gameboard.shipPos.get(ship).coordinates.length).toBe(2);
-
     // Attempt to place a ship that overflows bounds
     expect(() => gameboard.placeShip(mockShip(5), [3, 1], 'vertical')).toThrow('out of bounds');
+    expect(ship.coordinates.length).toBe(2);
   });
 
-  test('Invalid ship placement', () => {
+  test.only('Invalid ship placement', () => {
     const ship = mockShip(2);
 
     expect(() => gameboard.placeShip(ship, [0, 9], 'horizontal')).toThrow();
     expect(() => gameboard.placeShip(ship, [0, 0], 'vertical')).toThrow();
   });
 
-  test('Receiving an attack at empty coordinates', () => {
+  test.only('Receiving an attack at empty coordinates', () => {
     expect(gameboard.coordinates[0][0].hit).toBe(false);
     gameboard.receiveAttack([0, 0]);
     expect(gameboard.coordinates[0][0].hit).toBe(true);
@@ -102,7 +109,7 @@ describe('Gameboard', () => {
     expect(() => gameboard.receiveAttack([0, 0])).toThrow();
   });
 
-  test('Receiving an attack at ship coordinates', () => {
+  test.only('Receiving an attack at ship coordinates', () => {
     const ship = mockShip(2);
 
     // Try to place ship at coordinates that have already been hit
@@ -118,7 +125,7 @@ describe('Gameboard', () => {
     expect(ship.hit).toHaveBeenCalledTimes(1);
   });
 
-  test('Sinking all ships', () => {
+  test.only('Sinking all ships', () => {
     const ship1 = mockShip(1);
     const ship2 = mockShip(1);
 
@@ -136,25 +143,22 @@ describe('Gameboard', () => {
     expect(gameboard.allShipsSunk()).toBe(true);
   });
 
-  test('Removing a ship from the board', () => {
+  test.only('Removing a ship from the board', () => {
     const ship = mockShip(3);
 
     gameboard.placeShip(ship, [0, 0], 'horizontal');
 
-    expect(gameboard.shipPos.has(ship)).toBe(true);
-
     // Remove the ship
-    gameboard.removeShip(ship);
-    expect(gameboard.shipPos.has(ship)).toBe(false);
+    gameboard.resetShip(ship);
     expect(gameboard.coordinates[0][0].ship).toBe(null);
     expect(gameboard.coordinates[0][1].ship).toBe(null);
     expect(gameboard.coordinates[0][2].ship).toBe(null);
 
     // Remove a ship that doesn't exist on the board
-    expect(() => gameboard.removeShip({})).toThrow();
+    expect(() => gameboard.resetShip({})).toThrow();
   });
 
-  test('Random ship placement', () => {
+  test.only('Random ship placement', () => {
     const ship1 = mockShip(3);
     const ship2 = mockShip(10);
     const ship3 = mockShip(11);
@@ -163,7 +167,7 @@ describe('Gameboard', () => {
     gameboard.placeShipRandom(ship2);
     expect(() => gameboard.placeShipRandom(ship3)).toThrow();
 
-    expect(gameboard.shipPos.get(ship1).coordinates.length).toBe(3);
-    expect(gameboard.shipPos.get(ship2).coordinates.length).toBe(10);
+    expect(ship1.coordinates.length).toBe(3);
+    expect(ship2.coordinates.length).toBe(10);
   });
 });
