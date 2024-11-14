@@ -32,10 +32,18 @@ class Player {
     return this.#gameboard.allShipsSunk();
   }
 
+  allShipsPlaced() {
+    return this.#gameboard.allShipsPlaced();
+  }
+
   reset() {
     this.#gameboard.resetBoard();
 
     this.#opponent = null;
+  }
+
+  printBoard(title = '') {
+    this.#gameboard.printBoard(title || this.name);
   }
 }
 

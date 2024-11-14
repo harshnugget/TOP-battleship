@@ -222,6 +222,32 @@ class Gameboard {
     // No valid placement was found
     throw new Error('Could not place the ship!\nNo valid coordinates could be found.');
   }
+
+  // Represent the current state of the board
+  printBoard(title = '') {
+    if (title) {
+      console.log(`${title}:`);
+    }
+
+    // Characters for representing cells
+    const emptyCell = '0';
+    const shipCell = '1';
+    const hitCell = 'X';
+
+    for (let i = this.#size - 1; i >= 0; i--) {
+      let string = `Row ${i}:`.padEnd(10);
+      for (let j = 0; j < this.#size; j++) {
+        if (this.coordinates[i][j].hit === true) {
+          string += `| ${hitCell} |`;
+        } else if (this.coordinates[i][j].ship !== null) {
+          string += `| ${shipCell} |`;
+        } else {
+          string += `| ${emptyCell} |`;
+        }
+      }
+      console.log(string);
+    }
+  }
 }
 
 export default Gameboard;
