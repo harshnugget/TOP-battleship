@@ -1,11 +1,38 @@
 import Player from '../Player';
+import { jest } from '@jest/globals';
 
 describe('Player', () => {
-  let player1, player2;
+  let player1;
+  let player2;
+  let player1Gameboard;
+  let player2Gameboard;
+
+  const mockGameboard = (size) => {
+    return {
+      size,
+      coordinates: [
+        [null, null, null],
+        [null, null, null],
+      ],
+      receiveAttack: jest.fn().mockImplementation(function ([row, col]) {
+        this.coordinates[row][col] = 1;
+      }),
+      resetBoard: jest.fn().mockImplementation(function () {
+        this.coordinates.forEach((row, rowIndex) => {
+          row.forEach((_, colIndex) => {
+            this.coordinates[rowIndex][colIndex] = null;
+          });
+        });
+      }),
+    };
+  };
 
   beforeAll(() => {
-    player1 = new Player('Player 1');
-    player2 = new Player('Player 2');
+    player1Gameboard = mockGameboard(10);
+    player2Gameboard = mockGameboard(10);
+
+    player1 = new Player('Player 1', player1Gameboard);
+    player2 = new Player('Player 2', player2Gameboard);
 
     player1.opponent = player2;
     player2.opponent = player1;
@@ -19,102 +46,22 @@ describe('Player', () => {
     expect(player2.opponent).toBe(player1.name);
   });
 
-  describe('Placing, removing and attacking ships', () => {
-    const removeShipsFromBoard = (player) => {
-      let shipsOnBoard = player.ships.filter((ship) => ship.coordinates !== null);
+  test('Receive an attack', () => {
+    expect(player2Gameboard.coordinates[0][1]).toBe(null);
 
-      if (shipsOnBoard) {
-        shipsOnBoard.forEach((ship) => {
-          player.removeShip(ship.type);
-        });
-      }
-    };
-
-    test('Place a ship', () => {
-      player2.placeShip('cruiser', [2, 1], 'horizontal');
-      const { coordinates, length } = player2.getShipData('cruiser');
-
-      // Expect the array of coordinates to equal the ship's length
-      expect(coordinates.length).toBe(length);
-
-      expect(coordinates[0][0]).toBe(2);
-      expect(coordinates[0][1]).toBe(1);
-    });
-
-    test('Place all ships at random coordinates', () => {
-      player2.placeAllShipsRandom();
-
-      const allShipsPlaced = player2.ships.every((ship) => {
-        return ship.coordinates?.length > 0;
-      });
-
-      expect(allShipsPlaced).toBe(true);
-    });
-
-    test('Remove a ship', () => {
-      player1.placeShip('cruiser', [2, 1], 'horizontal');
-      player1.removeShip('cruiser');
-
-      const { coordinates } = player1.getShipData('cruiser');
-      expect(coordinates).toBe(null);
-    });
-
-    test('Remove all ships', () => {
-      player1.removeAllShips();
-
-      player1.ships.forEach((ship) => {
-        expect(ship.coordinates).toBe(null);
-      });
-    });
-
-    test('Attack a ship', () => {
-      player1.placeShip('destroyer', [2, 2], 'vertical');
-
-      expect(player2.attack([2, 3])).toBe(false); // Miss
-      expect(player2.attack([2, 2])).toBe(true); // Hit
-
-      // Attacking the same location
-      expect(() => player2.attack([2, 2])).toThrow();
-    });
-
-    test('Sink a ship', () => {
-      removeShipsFromBoard(player1);
-
-      // Expect an error if no ships on board to check
-      expect(() => player1.hasLost()).toThrow();
-
-      // Place a ship and sink it
-      player1.placeShip('cruiser', [0, 0], 'horizontal');
-
-      expect(player1.hasLost()).toBe(false);
-      expect(player2.attack([0, 0])).toBe(true); // Hit #1
-      expect(player2.attack([0, 1])).toBe(true); // Hit #2
-      expect(player2.attack([0, 2])).toBe(true); // Hit #3 - sinks ship
-      expect(player1.hasLost()).toBe(true);
-    });
-
-    test('Place a ship out of bounds by overflow', () => {
-      removeShipsFromBoard(player1);
-      removeShipsFromBoard(player2);
-
-      expect(() => player1.placeShip('carrier', [0, 6], 'horizontal')).toThrow();
-      expect(() => player1.placeShip('carrier', [3, 0], 'vertical')).toThrow();
-    });
+    player1.attack([0, 1]);
+    expect(player2Gameboard.coordinates[0][1]).toBe(1);
   });
 
   test('Resetting', () => {
-    player1.placeShip('submarine', [4, 4], 'horizontal');
+    player2.attack([0, 0]);
 
-    let shipsOnBoard = player1.ships.filter((ship) => ship.coordinates !== null);
+    expect(player1Gameboard.coordinates[0][0]).toBe(1);
 
-    expect(shipsOnBoard.length).toBeGreaterThanOrEqual(1);
-    expect(player1.opponent).not.toBe(null);
-
-    // Reset player data
     player1.reset();
 
-    shipsOnBoard = player1.ships.filter((ship) => ship.coordinates !== null);
-    expect(shipsOnBoard.length).toBe(0);
     expect(player1.opponent).toBe(null);
+    expect(player1Gameboard.resetBoard).toHaveBeenCalledTimes(1);
+    expect(player1Gameboard.coordinates[0][0]).toBe(null);
   });
 });
