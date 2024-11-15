@@ -1,21 +1,29 @@
 class GameController {
+  #player1;
+  #player2;
   #winner;
-  #shotHistory;
   #activePlayer;
+  #gameInProgress;
 
   constructor(player1, player2) {
-    this.player1 = player1;
-    this.player2 = player2;
-    this.#winner = null;
+    this.#player1 = player1;
+    this.#player2 = player2;
 
-    this.player1.opponent = player2;
-    this.player2.opponent = player1;
-
-    this.#shotHistory = new Map();
-    this.#shotHistory.set(player1, { successfulShots: [], missedShots: [] });
-    this.#shotHistory.set(player2, { successfulShots: [], missedShots: [] });
+    this.#player1.opponent = player2;
+    this.#player2.opponent = player1;
 
     this.#activePlayer = player1;
+
+    this.#winner = null;
+    this.#gameInProgress = false;
+  }
+
+  get player1() {
+    return this.#player1;
+  }
+
+  get player2() {
+    return this.#player2;
   }
 
   get winner() {
@@ -26,54 +34,52 @@ class GameController {
     return this.#activePlayer;
   }
 
-  get shotHistory() {
-    return new Map(this.#shotHistory);
+  get gameInProgress() {
+    return this.#gameInProgress;
   }
 
-  gameIsReady() {
-    if (this.#winner !== null) {
-      throw Error('A winner has been declared! Start a new game.');
+  resetGame() {
+    this.#player1.reset();
+    this.#player2.reset();
+    this.#player1.opponent = this.player2;
+    this.#player2.opponent = this.player1;
+    this.#winner = null;
+    this.#activePlayer = this.player1;
+    this.#gameInProgress = false;
+  }
+
+  startGame() {
+    if (this.#winner) {
+      throw Error(`Game has a winner! Start a new game.`);
     }
 
-    [this.player1, this.player2].every((player) =>
-      player.ships.every((ship) => {
-        try {
-          return ship.coordinates.length > 0;
-        } catch (error) {
-          throw Error(`All ships must be have valid coordinates.`);
-        }
-      })
-    );
+    const allShipsPlaced = [this.player1, this.player2].every((player) => {
+      return player.allShipsPlaced();
+    });
+
+    if (allShipsPlaced === false) {
+      throw Error('Cannot start game until all ships are placed.');
+    }
+
+    this.#gameInProgress = true;
   }
 
   switchTurn() {
-    this.#activePlayer = this.#activePlayer === this.player1 ? this.player2 : this.player1;
+    this.#activePlayer = this.#activePlayer === this.#player1 ? this.#player2 : this.#player1;
   }
 
-  attack(coordinates) {
-    try {
-      this.gameIsReady();
-    } catch (error) {
-      throw Error(`Cannot attack until game is ready to begin.`, { cause: error });
+  attack([row, col]) {
+    if (!this.#gameInProgress) {
+      this.startGame();
     }
 
     let successfulShot;
     const activePlayer = this.#activePlayer;
 
     try {
-      successfulShot = activePlayer.attack(coordinates);
+      successfulShot = activePlayer.attack([row, col]);
 
-      if (successfulShot === true) {
-        console.log(
-          `${activePlayer.name} successfully hit a target at: [${coordinates[0]}, ${coordinates[1]}]`
-        );
-        this.#shotHistory.get(activePlayer).successfulShots.push(coordinates);
-      } else if (successfulShot === false) {
-        console.log(
-          `${activePlayer.name} missed a target at: [${coordinates[0]}, ${coordinates[1]}]`
-        );
-        this.#shotHistory.get(activePlayer).missedShots.push(coordinates);
-      } else {
+      if (successfulShot !== true && successfulShot !== false) {
         throw Error(
           `activePlayer.attack(coordinates) must return true or false!\nReceived: ${successfulShot}`
         );
@@ -82,9 +88,8 @@ class GameController {
       throw Error(`Could not attack this position.`, { cause: error });
     }
 
-    if (this.gameHasWinner()) {
-      console.log(`${this.#activePlayer.name} is the winner!`);
-    } else {
+    // Switch turn if no winners
+    if (!this.gameHasWinner()) {
       this.switchTurn();
     }
 
@@ -93,12 +98,16 @@ class GameController {
   }
 
   gameHasWinner() {
-    if (this.player1.hasLost() || this.player2.hasLost()) {
-      this.#winner = this.#activePlayer;
-      return true;
+    if (this.#player1.hasLost()) {
+      this.#winner = this.#player2;
+    } else if (this.player2.hasLost()) {
+      this.#winner = this.#player1;
+    } else {
+      return false;
     }
 
-    return false;
+    this.#gameInProgress = false; // Stop the game
+    return true;
   }
 }
 
