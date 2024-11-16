@@ -41,6 +41,68 @@ class BattleshipUI extends Battleship {
       container.append(gameboardContainer);
     });
   }
+
+  hideShips(playerId, isHidden = true) {
+    const { gameboardUI, ships } = this.getPlayerData(playerId);
+
+    gameboardUI.hideShips(isHidden);
+
+    Object.values(ships).forEach(({ shipUI }) => {
+      shipUI.hideShip(isHidden);
+    });
+
+    this.render();
+  }
+
+  startGame() {
+    super.startGame();
+  }
+
+  resetGame() {
+    super.resetGame();
+    this.render();
+  }
+
+  attack(row, col) {
+    super.attack(row, col);
+    this.render();
+  }
+
+  placeShip(playerId, type, coordinates, orientation) {
+    super.placeShip(playerId, type, coordinates, orientation);
+    this.render();
+  }
+
+  resetShip(playerId, type) {
+    super.resetShip(playerId, type);
+    this.render();
+  }
+
+  placeAllShips(playerId) {
+    super.placeAllShips(playerId);
+    this.render();
+  }
+
+  resetAllShips(playerId) {
+    super.resetAllShips(playerId);
+    this.render();
+  }
+
+  render() {
+    const player1 = super.getPlayerData(1);
+    const player2 = super.getPlayerData(2);
+
+    [player1, player2].forEach((player) => {
+      const ships = player.ships;
+      const gameboardUI = player.gameboardUI;
+
+      gameboardUI.render();
+
+      Object.values(ships).forEach(({ shipUI }) => {
+        shipUI.render();
+      });
+    });
+  }
 }
 
 export default BattleshipUI;
