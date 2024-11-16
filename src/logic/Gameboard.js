@@ -224,22 +224,25 @@ class Gameboard {
   }
 
   // Represent the current state of the board
-  printBoard(title = '') {
+  printBoard(title = '', hideShips = false) {
     if (title) {
-      console.log(`${title}:`);
+      console.log(`${title}`);
     }
 
     // Characters for representing cells
-    const emptyCell = '0';
-    const shipCell = '1';
-    const hitCell = 'X';
+    const emptyCell = '-';
+    const shipCell = 'S';
+    const hitCell = 'H';
+    const missCell = 'M';
 
     for (let i = this.#size - 1; i >= 0; i--) {
       let string = `Row ${i}:`.padEnd(10);
       for (let j = 0; j < this.#size; j++) {
-        if (this.coordinates[i][j].hit === true) {
+        if (this.coordinates[i][j].hit === true && this.coordinates[i][j].ship !== null) {
           string += `| ${hitCell} |`;
-        } else if (this.coordinates[i][j].ship !== null) {
+        } else if (this.coordinates[i][j].hit === true) {
+          string += `| ${missCell} |`;
+        } else if (this.coordinates[i][j].ship !== null && hideShips === false) {
           string += `| ${shipCell} |`;
         } else {
           string += `| ${emptyCell} |`;

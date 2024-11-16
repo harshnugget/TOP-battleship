@@ -42,8 +42,8 @@ class Player {
     this.#opponent = null;
   }
 
-  printBoard(title = '') {
-    this.#gameboard.printBoard(title || this.name);
+  printBoard(title = '', hideShips = false) {
+    this.#gameboard.printBoard(`${title}` || `${this.name} Board:`, hideShips);
   }
 }
 
