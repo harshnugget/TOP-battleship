@@ -80,6 +80,14 @@ class GameboardUI {
     return this.#gameboardElement.querySelectorAll(`:scope > .cell`);
   }
 
+  hideShips(isHidden = true) {
+    if (isHidden) {
+      this.hidden = true;
+    } else {
+      this.hidden = false;
+    }
+  }
+
   render() {
     this.#gameboard.coordinates.forEach((row, rowIndex) =>
       row.forEach((col, colIndex) => {

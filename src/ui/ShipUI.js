@@ -133,11 +133,21 @@ class ShipUI {
     this.#parentContainer.append(element);
   }
 
+  hideShip(isHidden = true) {
+    if (isHidden) {
+      this.hidden = true;
+    } else {
+      this.hidden = false;
+    }
+
+    this.render();
+  }
+
   render() {
     if (this.hidden === true) {
-      return (this.shipElement.style.display = 'none');
+      return (this.shipElement.style.visibility = 'hidden');
     } else {
-      this.shipElement.style.display = 'grid';
+      this.shipElement.style.visibility = '';
     }
 
     const coordinates = this.#ship.coordinates;
