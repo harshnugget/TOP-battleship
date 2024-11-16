@@ -75,8 +75,14 @@ class Battleship {
     }
   }
 
+  validateAction(action) {
+    if (this.#controller.gameInProgress)
+      throw Error(`Cannot execute "${action}" while game is in progress!`);
+  }
+
   startGame() {
     try {
+      this.validateAction('start game');
       this.#controller.startGame();
       this.logMessage('Game started.');
       this.prompt();
@@ -87,6 +93,7 @@ class Battleship {
 
   resetGame() {
     try {
+      this.validateAction('reset game');
       this.#controller.resetGame();
       this.resetAllShips(1);
       this.resetAllShips(2);
@@ -136,6 +143,7 @@ class Battleship {
 
   placeShip(playerId, type, coordinates, orientation) {
     try {
+      this.validateAction('place ship');
       const { ships, gameboard } = this.getPlayerData(playerId);
       gameboard.placeShip(ships[type].ship, coordinates, orientation);
       this.logMessage(`Placed ${type} at [${coordinates[0]}, ${coordinates[1]}]`);
@@ -146,6 +154,7 @@ class Battleship {
 
   resetShip(playerId, type) {
     try {
+      this.validateAction('reset ship');
       const { ships, gameboard } = this.getPlayerData(playerId);
       gameboard.resetShip(ships[type].ship);
       this.logMessage(`Removed ${type} from gameboard.`);
@@ -156,6 +165,7 @@ class Battleship {
 
   placeAllShips(playerId) {
     try {
+      this.validateAction('place all ships');
       const { ships, gameboard } = this.getPlayerData(playerId);
       Object.values(ships).forEach(({ ship }) => {
         gameboard.placeShipRandom(ship);
@@ -168,6 +178,7 @@ class Battleship {
 
   resetAllShips(playerId) {
     try {
+      this.validateAction('reset all ships');
       const { ships, gameboard } = this.getPlayerData(playerId);
       Object.values(ships).forEach(({ ship }) => {
         gameboard.resetShip(ship);
