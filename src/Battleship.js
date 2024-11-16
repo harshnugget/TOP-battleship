@@ -42,6 +42,14 @@ class Battleship {
     this.logMessages = Boolean(logMessages);
   }
 
+  get activePlayer() {
+    return this.#controller.activePlayer;
+  }
+
+  get winner() {
+    return this.#controller.winner;
+  }
+
   logMessage(message, level = 'info') {
     if (this.logMessages && message) {
       switch (level) {

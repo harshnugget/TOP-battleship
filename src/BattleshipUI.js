@@ -103,6 +103,47 @@ class BattleshipUI extends Battleship {
       });
     });
   }
+
+  addGameboardEventListeners() {
+    const player1 = super.getPlayerData(1);
+    const player2 = super.getPlayerData(2);
+
+    [player1, player2].forEach((player) => {
+      const { gameboardUI } = player;
+      const gameboard = gameboardUI.gameboardElement;
+      const cells = gameboardUI.getAllCells();
+
+      // Retrieves the gameboard cell at the location of a click
+      const getCell = (event) => {
+        const elements = document.elementsFromPoint(event.clientX, event.clientY);
+
+        const cell = elements.find((element) => {
+          return element.classList.contains('cell') && element.parentElement === gameboard;
+        });
+
+        return cell;
+      };
+
+      const attackCell = (cell) => {
+        if (super.winner) {
+          return console.error('Game has ended! Start a new game.');
+        }
+
+        if (player.player !== super.activePlayer && cell) {
+          this.attack(cell.dataset.row, cell.dataset.column);
+        }
+      };
+
+      cells.forEach((cell) => {
+        cell.addEventListener('click', (event) => {
+          const cell = getCell(event);
+          if (cell) {
+            attackCell(cell);
+          }
+        });
+      });
+    });
+  }
 }
 
 export default BattleshipUI;
