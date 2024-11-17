@@ -9,6 +9,7 @@ const createShipElement = (length) => {
   element.style.gridTemplateRows = `repeat(1, ${cellSize}px)`;
   element.style.width = 'max-content';
   element.style.height = 'max-content';
+  element.style.zIndex = '1';
 
   const createCellContainer = () => {
     const element = document.createElement('div');
@@ -99,8 +100,8 @@ class ShipUI {
     }
   }
 
-  placeShip(coordinates) {
-    const cell = this.#gameboardUI.getCell(coordinates);
+  placeShip([row, col]) {
+    const cell = this.#gameboardUI.getCell([row, col]);
     const ship = this.#shipElement;
 
     // Ensure the position styles are set correctly

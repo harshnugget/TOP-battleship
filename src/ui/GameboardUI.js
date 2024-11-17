@@ -13,6 +13,7 @@ const createGameboardElement = (size) => {
   element.style.width = 'max-content';
   element.style.height = 'max-content';
   element.style.gap = '1px';
+  element.style.zIndex = '0';
 
   const createCellContainer = () => {
     const element = document.createElement('div');
@@ -65,11 +66,9 @@ class GameboardUI {
     return this.#gameboard;
   }
 
-  getCell(coordinates) {
+  getCell([row, col]) {
     // Return the cell at specified coordinates
-    return this.#gameboardElement.querySelector(
-      `[data-row="${coordinates[0]}"][data-column="${coordinates[1]}"]`
-    );
+    return this.#gameboardElement.querySelector(`[data-row="${row}"][data-column="${col}"]`);
   }
 
   getHitCells() {
