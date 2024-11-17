@@ -50,6 +50,10 @@ class Battleship {
     return this.#controller.winner;
   }
 
+  get gameInProgress() {
+    return this.#controller.gameInProgress;
+  }
+
   logMessage(message, level = 'info') {
     if (this.logMessages && message) {
       switch (level) {
@@ -74,7 +78,7 @@ class Battleship {
   }
 
   prompt() {
-    if (this.#controller.gameInProgress === true) {
+    if (this.gameInProgress === true) {
       this.logMessage(
         `Waiting for Player ${this.getPlayerId(this.#controller.activePlayer)} to attack: `
       );
@@ -84,8 +88,11 @@ class Battleship {
   }
 
   validateAction(action) {
-    if (this.#controller.gameInProgress)
+    if (this.winner) {
+      throw Error(`Cannot execute ${action}! Game has ended.`);
+    } else if (this.gameInProgress) {
       throw Error(`Cannot execute "${action}" while game is in progress!`);
+    }
   }
 
   startGame() {
@@ -155,6 +162,21 @@ class Battleship {
       const { ships, gameboard } = this.getPlayerData(playerId);
       gameboard.placeShip(ships[type].ship, coordinates, orientation);
       this.logMessage(`Placed ${type} at [${coordinates[0]}, ${coordinates[1]}]`);
+    } catch (error) {
+      this.logMessage(this.formatErrorMsg(error), 'error');
+    }
+  }
+
+  rotateShip(playerId, type) {
+    try {
+      this.validateAction('rotate ship');
+      const { gameboard, ships } = this.getPlayerData(playerId);
+      const ship = ships[type].ship;
+
+      const coordinates = ship.coordinates[0];
+      const newOrientation = ship.orientation === 'horizontal' ? 'vertical' : 'horizontal';
+
+      gameboard.placeShip(ship, coordinates, newOrientation);
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');
     }
