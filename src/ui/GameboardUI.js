@@ -22,7 +22,7 @@ const createGameboardElement = (size) => {
     return element;
   };
 
-  for (let row = size - 1; row >= 0; row--) {
+  for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
       const cellContainer = createCellContainer();
       cellContainer.dataset.row = row;
