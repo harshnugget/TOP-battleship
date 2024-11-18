@@ -89,7 +89,7 @@ class ShipUI {
 
   setOrientation(orientation) {
     const element = this.#shipElement;
-    const length = element.querySelectorAll('.cell').length;
+    const length = this.ship.length;
 
     if (orientation === 'vertical') {
       element.style.gridTemplateColumns = `repeat(1, 40px)`;
@@ -100,15 +100,40 @@ class ShipUI {
     }
   }
 
+  isWithinBounds([row, col]) {
+    for (let i = 0; i < this.ship.length; i++) {
+      let cell;
+
+      if (this.ship.orientation === 'horizontal') {
+        cell = this.#gameboardUI.getCell([row, col + i]);
+      } else if (this.ship.orientation === 'vertical') {
+        cell = this.#gameboardUI.getCell([row - i, col]);
+      }
+
+      if (!cell) {
+        return false; // Out of bounds
+      }
+    }
+
+    return true; // Within bounds
+  }
+
   placeShip([row, col]) {
     const cell = this.#gameboardUI.getCell([row, col]);
-    const ship = this.#shipElement;
 
-    // Ensure the position styles are set correctly
-    cell.style.position = 'relative';
-    ship.style.position = 'absolute';
+    if (cell !== this.#shipElement.parentElement) {
+      if (!this.isWithinBounds([row, col])) {
+        throw new Error('Out of bounds!');
+      }
 
-    cell.append(ship);
+      const ship = this.#shipElement;
+
+      // Ensure the position styles are set correctly
+      cell.style.position = 'relative';
+      ship.style.position = 'absolute';
+
+      cell.append(ship);
+    }
   }
 
   receiveHit(cellIndex) {
