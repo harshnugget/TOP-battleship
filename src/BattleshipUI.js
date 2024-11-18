@@ -15,6 +15,19 @@ class BattleshipUI {
     return { gameboardContainer, shipsContainer };
   }
 
+  static createButton({ text, id, className, onClick, styles = {} }) {
+    const button = document.createElement('button');
+    button.textContent = text;
+
+    if (id) button.id = id;
+    if (className) button.className = className;
+    if (onClick && typeof onClick === 'function') button.addEventListener('click', onClick);
+
+    Object.assign(button.style, styles);
+
+    return button;
+  }
+
   constructor(battleship, container = document.body) {
     this.#battleship = battleship;
 
@@ -40,8 +53,66 @@ class BattleshipUI {
   createUI(container = document.body) {
     const players = [this.getPlayerData(1), this.getPlayerData(2)];
 
+    const createMainButtons = (container) => {
+      container.append(
+        BattleshipUI.createButton({
+          text: 'Start Game',
+          className: 'start-btn',
+          onClick: () => this.startGame(),
+        })
+      );
+
+      container.append(
+        BattleshipUI.createButton({
+          text: 'Reset Game',
+          className: 'reset-btn',
+          onClick: () => this.resetGame(),
+        })
+      );
+    };
+
+    const createPlayerButtons = (gameboardContainer, playerId) => {
+      gameboardContainer.append(
+        BattleshipUI.createButton({
+          text: 'Place Ships',
+          className: 'place-ships-btn',
+          onClick: () => this.placeAllShips(playerId),
+        })
+      );
+
+      gameboardContainer.append(
+        BattleshipUI.createButton({
+          text: 'Reset Ships',
+          className: 'reset-ships-btn',
+          onClick: () => this.resetAllShips(playerId),
+        })
+      );
+
+      gameboardContainer.append(
+        BattleshipUI.createButton({
+          text: 'Toggle Ships',
+          className: 'toggle-ships-btn',
+          onClick: (() => {
+            let hide = true;
+            return () => {
+              if (hide) {
+                this.hideShips(playerId);
+              } else {
+                this.hideShips(playerId, false);
+              }
+              hide = !hide;
+            };
+          })(),
+        })
+      );
+    };
+
+    createMainButtons(container);
+
     players.forEach((player) => {
       const { gameboardContainer, shipsContainer } = BattleshipUI.createContainers();
+
+      createPlayerButtons(gameboardContainer, player.id);
 
       const gameboard = player.gameboard;
       const ships = player.ships;
