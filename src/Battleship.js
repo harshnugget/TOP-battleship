@@ -107,8 +107,9 @@ class Battleship {
   }
 
   resetGame() {
+    if (!this.gameInProgress) return;
+
     try {
-      this.validateAction('reset game');
       this.#controller.resetGame();
       this.resetAllShips(1);
       this.resetAllShips(2);

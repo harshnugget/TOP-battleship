@@ -1,8 +1,9 @@
-import Battleship from './Battleship.js';
 import GameboardUI from './ui/GameboardUI.js';
 import ShipUI from './ui/ShipUI.js';
 
-class BattleshipUI extends Battleship {
+class BattleshipUI {
+  #battleship;
+
   // Containers for the gameboard and ships UI
   static createContainers() {
     const gameboardContainer = document.createElement('div');
@@ -14,17 +15,32 @@ class BattleshipUI extends Battleship {
     return { gameboardContainer, shipsContainer };
   }
 
-  constructor(player1Name, player2Name, logMessages = false) {
-    super(player1Name, player2Name, logMessages);
+  constructor(battleship, container = document.body) {
+    this.#battleship = battleship;
 
-    this.createUI();
+    this.createUI(container);
+  }
+
+  get activePlayer() {
+    return this.#battleship.activePlayer;
+  }
+
+  get gameInProgress() {
+    return this.#battleship.gameInProgress;
+  }
+
+  get winner() {
+    return this.#battleship.winner;
+  }
+
+  getPlayerData(playerId) {
+    return this.#battleship.getPlayerData(playerId);
   }
 
   createUI(container = document.body) {
-    const player1 = super.getPlayerData(1);
-    const player2 = super.getPlayerData(2);
+    const players = [this.getPlayerData(1), this.getPlayerData(2)];
 
-    [player1, player2].forEach((player) => {
+    players.forEach((player) => {
       const { gameboardContainer, shipsContainer } = BattleshipUI.createContainers();
 
       const gameboard = player.gameboard;
@@ -56,49 +72,48 @@ class BattleshipUI extends Battleship {
   }
 
   startGame() {
-    super.startGame();
+    this.#battleship.startGame();
   }
 
   resetGame() {
-    super.resetGame();
+    this.#battleship.resetGame();
     this.render();
   }
 
   attack(row, col) {
-    super.attack(row, col);
+    this.#battleship.attack(row, col);
     this.render();
   }
 
   placeShip(playerId, type, coordinates, orientation) {
-    super.placeShip(playerId, type, coordinates, orientation);
+    this.#battleship.placeShip(playerId, type, coordinates, orientation);
     this.render();
   }
 
   rotateShip(playerId, type) {
-    super.rotateShip(playerId, type);
+    this.#battleship.rotateShip(playerId, type);
     this.render();
   }
 
   resetShip(playerId, type) {
-    super.resetShip(playerId, type);
+    this.#battleship.resetShip(playerId, type);
     this.render();
   }
 
   placeAllShips(playerId) {
-    super.placeAllShips(playerId);
+    this.#battleship.placeAllShips(playerId);
     this.render();
   }
 
   resetAllShips(playerId) {
-    super.resetAllShips(playerId);
+    this.#battleship.resetAllShips(playerId);
     this.render();
   }
 
   render() {
-    const player1 = super.getPlayerData(1);
-    const player2 = super.getPlayerData(2);
+    const players = [this.getPlayerData(1), this.getPlayerData(2)];
 
-    [player1, player2].forEach((player) => {
+    players.forEach((player) => {
       const { ships, gameboardUI } = player;
 
       gameboardUI.render();
@@ -110,146 +125,128 @@ class BattleshipUI extends Battleship {
   }
 
   addGameboardEventListeners() {
-    const player1 = super.getPlayerData(1);
-    const player2 = super.getPlayerData(2);
+    const players = [this.getPlayerData(1), this.getPlayerData(2)];
 
-    [player1, player2].forEach((player) => {
+    players.forEach((player) => {
       const { gameboardUI } = player;
-      const gameboard = gameboardUI.gameboardElement;
+      const gameboardElement = gameboardUI.gameboardElement;
       const cells = gameboardUI.getAllCells();
       let cellDraggedOver;
 
-      // Retrieves the element, with specified class and parent, at the location of a click
+      // Helper function to get a specific element at mouse event position
       const getElement = (event, className, parentElement) => {
         const elements = document.elementsFromPoint(event.clientX, event.clientY);
-
-        return elements.find((element) => {
-          return (
-            element.classList.contains(`${className}`) && element.parentElement === parentElement
-          );
-        });
+        return elements.find(
+          (element) =>
+            element.classList.contains(className) && element.parentElement === parentElement
+        );
       };
 
-      // Sends an attack at the coordinates of the specified gameboard cell
-      const attackCell = (cell) => {
-        if (player.player !== super.activePlayer && super.gameInProgress && cell) {
-          this.attack(cell.dataset.row, cell.dataset.column);
-        }
-      };
-
-      const getCoordinatesByCellIndex = (orientation, index) => {
-        /* Calculate the coordinates to place a ship based on the index of the ship cell at the location of dragstart.
-        EXAMPLE:
-        1. A ship of length 4 (4 cells) is oriented horizontally.
-        2. The user begins the dragstart event at the position of the 3rd ship cell, so the index is 3.
-        3. The current gameboard cell dragged over has coordinates [row: 5, column: 9].
-        4. The final placement coordinates adjust the column by subtracting the index (9 - 3 = 6).
-        5. The ship will be placed at [row: 5, column: 6]. */
-
+      // Helper function to calculate coordinates based on a ship cell index, for better drag interaction
+      const getPlacementCoordinates = (orientation, index) => {
         if (!cellDraggedOver) return;
-
         let row = Number(cellDraggedOver.dataset.row);
         let col = Number(cellDraggedOver.dataset.column);
 
-        if (orientation === 'horizontal') {
-          col -= index;
-        } else if (orientation === 'vertical') {
-          row += index;
-        }
-
-        return [row, col];
+        return orientation === 'horizontal' ? [row, col - index] : [row - index, col];
       };
 
-      // Add event listeners to each cell
-      cells.forEach((cell) => {
-        // Handle click for attacking at current gameboard cell
-        cell.addEventListener('click', (event) => {
-          const cell = getElement(event, 'cell', gameboard);
+      // Helper function to handle ship placement
+      const handleShipPlacement = (type, ship, cellIndex) => {
+        const coordinates = getPlacementCoordinates(ship.orientation, cellIndex);
+        if (coordinates) {
+          const [row, col] = coordinates;
+          const cell = gameboardUI.getCell([row, col]);
           if (cell) {
-            attackCell(cell);
+            this.placeShip(player.id, type, [row, col], ship.orientation);
+            cellDraggedOver = null;
           }
+        }
+      };
+
+      // Add event listeners for handling gameboard cell interaction
+      const addCellEventListeners = () => {
+        cells.forEach((cell) => {
+          cell.addEventListener('click', (event) => {
+            const clickedCell = getElement(event, 'cell', gameboardElement);
+            if (clickedCell && player.player !== this.activePlayer && this.gameInProgress) {
+              this.attack(clickedCell.dataset.row, clickedCell.dataset.column);
+            }
+          });
+
+          cell.addEventListener('dragenter', (event) => {
+            cellDraggedOver = getElement(event, 'cell', gameboardElement) || cellDraggedOver;
+          });
         });
+      };
 
-        // Handle drag enter for tracking the current gameboard cell
-        cell.addEventListener('dragenter', (event) => {
-          const cell = getElement(event, 'cell', gameboard);
-          if (cell) {
-            cellDraggedOver = cell;
-          }
-        });
-      });
+      // Add event listeners for handling ship interaction
+      const addShipEventListeners = () => {
+        Object.keys(player.ships).forEach((type) => {
+          const { ship, shipUI } = player.ships[type];
+          const shipElement = shipUI.shipElement;
+          let cellIndex;
 
-      // Add event listeners to each ship
-      Object.keys(player.ships).forEach((type) => {
-        const ship = player.ships[type].ship;
-        const shipUI = player.ships[type].shipUI;
-        const shipElement = shipUI.shipElement;
-        let cellIndex;
+          // Make ships draggable
+          shipElement.draggable = true;
 
-        // Ensure the ship element is draggable
-        shipElement.draggable = true;
+          // Event for rotating ships
+          shipElement.addEventListener('click', () => {
+            if (!this.gameInProgress && !this.winner) {
+              this.rotateShip(player.id, type);
+            }
+          });
 
-        // Handle click for ship rotation
-        shipElement.addEventListener('click', () => {
-          if (!super.gameInProgress && !super.winner) {
-            this.rotateShip(player.id, type);
-          }
-        });
+          // Event for handling the start of a ship drag
+          shipElement.addEventListener('dragstart', (event) => {
+            if (this.gameInProgress || this.winner) {
+              event.preventDefault();
+              shipElement.draggable = false;
+              return;
+            }
 
-        // Handle drag start to begin ship repositioning
-        shipElement.addEventListener('dragstart', (event) => {
-          // Function to remove the ship's current gameboard cells while dragging
-          const removeFromBoard = () => {
-            // Store the ship's current orientation for restoration after resetting
+            // Retrieve the the ship cell at mouse position
+            const shipCell = getElement(event, 'cell', shipElement);
+
+            // Remove the ship from gameboard during drag operation
             const prevOrientation = ship.orientation;
-
-            // Reset the ship and update the gameboard UI, effectively removing the ship from its current position
-            super.resetShip(player.id, type);
-            gameboardUI.render();
-
-            // Restore the ship's previous orientation for consistent repositioning
+            this.#battleship.resetShip(player.id, type);
             ship.orientation = prevOrientation;
-          };
 
-          if (!super.gameInProgress && !super.winner) {
-            const cell = getElement(event, 'cell', shipElement);
-            removeFromBoard();
-            cellIndex = [...shipElement.children].findIndex((child) => child === cell);
-          } else {
-            event.preventDefault();
-            shipElement.draggable = false;
-          }
-        });
+            // Store the index of the ship cell
+            cellIndex = [...shipElement.children].findIndex((child) => child === shipCell);
+          });
 
-        // Handle the dragging for ship placeholders
-        shipElement.addEventListener('drag', () => {
-          const coordinates = getCoordinatesByCellIndex(ship.orientation, cellIndex);
+          // Event for handling ship placeholders while dragging
+          shipElement.addEventListener('drag', () => {
+            const coordinates = getPlacementCoordinates(ship.orientation, cellIndex);
 
-          if (coordinates) {
-            try {
+            if (coordinates) {
               const [row, col] = coordinates;
-              shipUI.placeShip([row, col]);
-            } catch {
-              return false;
+              shipUI.placeShipPlaceholder([row, col]);
             }
-          }
-        });
+          });
 
-        // Handle drag end to place ship in new position
-        shipElement.addEventListener('dragend', () => {
-          const coordinates = getCoordinatesByCellIndex(ship.orientation, cellIndex);
+          // Event for handling ship placement
+          shipElement.addEventListener('dragend', (event) => {
+            handleShipPlacement(type, ship, cellIndex);
 
-          if (coordinates) {
-            const [row, col] = coordinates;
-            const cell = gameboardUI.getCell([row, col]);
+            const gameboardDraggedOver = getElement(
+              event,
+              'gameboard',
+              gameboardElement.parentElement
+            );
 
-            if (cell) {
-              this.placeShip(player.id, type, [row, col], ship.orientation);
-              cellDraggedOver = null;
+            if (!gameboardDraggedOver) {
+              this.resetShip(player.id, type);
             }
-          }
+          });
         });
-      });
+      };
+
+      // Initialize all event listeners for cells and ships
+      addCellEventListeners();
+      addShipEventListeners();
     });
   }
 }
