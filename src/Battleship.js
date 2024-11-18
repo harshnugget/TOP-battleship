@@ -123,8 +123,10 @@ class Battleship {
       const activePlayer = this.#controller.activePlayer;
       const hit = this.#controller.attack([row, col]);
       const message = `Player ${this.getPlayerId(activePlayer)} ${hit ? 'hit' : 'missed'} a target at: [${row}, ${col}]`;
+
       this.printBoard(1, true);
       this.printBoard(2, true);
+
       this.logMessage(`${message}`);
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');
@@ -144,6 +146,7 @@ class Battleship {
   getPlayerData(id) {
     const player = this.#players[id - 1];
     if (!player) throw new Error(`Invalid player ID: ${id}`);
+
     return player;
   }
 
@@ -160,7 +163,9 @@ class Battleship {
     try {
       this.validateAction('place ship');
       const { ships, gameboard } = this.getPlayerData(playerId);
+
       gameboard.placeShip(ships[type].ship, coordinates, orientation);
+
       this.logMessage(`Placed ${type} at [${coordinates[0]}, ${coordinates[1]}]`);
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');
@@ -173,10 +178,10 @@ class Battleship {
       const { gameboard, ships } = this.getPlayerData(playerId);
       const ship = ships[type].ship;
 
-      const coordinates = ship.coordinates[0];
+      const coordinates = ship.coordinates;
       const newOrientation = ship.orientation === 'horizontal' ? 'vertical' : 'horizontal';
 
-      gameboard.placeShip(ship, coordinates, newOrientation);
+      if (coordinates.length > 0) gameboard.placeShip(ship, coordinates[0], newOrientation);
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');
     }
@@ -186,8 +191,13 @@ class Battleship {
     try {
       this.validateAction('reset ship');
       const { ships, gameboard } = this.getPlayerData(playerId);
-      gameboard.resetShip(ships[type].ship);
-      this.logMessage(`Removed ${type} from gameboard.`);
+
+      const ship = ships[type].ship;
+      const coordinates = ship.coordinates;
+
+      gameboard.resetShip(ship);
+
+      if (coordinates.length > 0) this.logMessage(`Removed ${type} from gameboard.`);
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');
     }
@@ -197,9 +207,11 @@ class Battleship {
     try {
       this.validateAction('place all ships');
       const { ships, gameboard } = this.getPlayerData(playerId);
+
       Object.values(ships).forEach(({ ship }) => {
         gameboard.placeShipRandom(ship);
       });
+
       this.logMessage(`Placed all ships for Player ${playerId}.`);
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');
@@ -209,10 +221,12 @@ class Battleship {
   resetAllShips(playerId) {
     try {
       this.validateAction('reset all ships');
+
       const { ships, gameboard } = this.getPlayerData(playerId);
       Object.values(ships).forEach(({ ship }) => {
         gameboard.resetShip(ship);
       });
+
       this.logMessage(`Reset all ships for Player ${playerId}.`);
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');

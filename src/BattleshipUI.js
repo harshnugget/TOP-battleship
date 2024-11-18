@@ -191,11 +191,8 @@ class BattleshipUI extends Battleship {
 
         // Handle click for ship rotation
         shipElement.addEventListener('click', () => {
-          try {
-            super.validateAction('rotate ship');
+          if (!super.gameInProgress && !super.winner) {
             this.rotateShip(player.id, type);
-          } catch (error) {
-            super.logMessage(super.formatErrorMsg(error), 'error');
           }
         });
 
@@ -214,40 +211,42 @@ class BattleshipUI extends Battleship {
             ship.orientation = prevOrientation;
           };
 
-          try {
-            super.validateAction('drag ship');
+          if (!super.gameInProgress && !super.winner) {
             const cell = getElement(event, 'cell', shipElement);
             removeFromBoard();
             cellIndex = [...shipElement.children].findIndex((child) => child === cell);
-          } catch (error) {
+          } else {
             event.preventDefault();
             shipElement.draggable = false;
-            super.logMessage(super.formatErrorMsg(error), 'error');
           }
         });
 
         // Handle the dragging for ship placeholders
         shipElement.addEventListener('drag', () => {
-          try {
-            const [row, col] = getCoordinatesByCellIndex(ship.orientation, cellIndex);
-            shipUI.placeShip([row, col]);
-          } catch (error) {
-            super.logMessage(super.formatErrorMsg(error), 'error');
+          const coordinates = getCoordinatesByCellIndex(ship.orientation, cellIndex);
+
+          if (coordinates) {
+            try {
+              const [row, col] = coordinates;
+              shipUI.placeShip([row, col]);
+            } catch {
+              return false;
+            }
           }
         });
 
         // Handle drag end to place ship in new position
         shipElement.addEventListener('dragend', () => {
-          try {
-            const [row, col] = getCoordinatesByCellIndex(ship.orientation, cellIndex);
+          const coordinates = getCoordinatesByCellIndex(ship.orientation, cellIndex);
+
+          if (coordinates) {
+            const [row, col] = coordinates;
             const cell = gameboardUI.getCell([row, col]);
 
             if (cell) {
               this.placeShip(player.id, type, [row, col], ship.orientation);
               cellDraggedOver = null;
             }
-          } catch (error) {
-            super.logMessage(super.formatErrorMsg(error), 'error');
           }
         });
       });
