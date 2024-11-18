@@ -270,6 +270,14 @@ class BattleshipUI {
 
           // Event for handling the start of a ship drag
           shipElement.addEventListener('dragstart', (event) => {
+            // Get the mouse position relative to the element
+            const rect = shipElement.getBoundingClientRect();
+            const offsetX = event.clientX - rect.left; // X offset
+            const offsetY = event.clientY - rect.top; // Y offset
+
+            // Set the drag image and position it relative to the mouse cursor
+            event.dataTransfer.setDragImage(shipElement, offsetX, offsetY);
+
             if (this.gameInProgress || this.winner) {
               event.preventDefault();
               shipElement.draggable = false;
