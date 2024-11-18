@@ -41,6 +41,7 @@ class ShipUI {
     this.cellColours = {
       ship: gameboardUI.cellColours.ship,
       hit: gameboardUI.cellColours.hit,
+      placeholder: 'grey',
     };
 
     this.#shipElement = this.createShip(ship.length);
@@ -100,39 +101,56 @@ class ShipUI {
     }
   }
 
-  isWithinBounds([row, col]) {
+  placeShip([row, col]) {
+    const cell = this.#gameboardUI.getCell([row, col]);
+
+    const ship = this.#shipElement;
+
+    // Ensure the position styles are set correctly
+    cell.style.position = 'relative';
+    ship.style.position = 'absolute';
+
+    cell.append(ship);
+    this.removeShipPlaceholder();
+  }
+
+  placeShipPlaceholder([row, col]) {
+    const placeholderCells = [];
+
+    this.removeShipPlaceholder();
+
     for (let i = 0; i < this.ship.length; i++) {
       let cell;
 
       if (this.ship.orientation === 'horizontal') {
         cell = this.#gameboardUI.getCell([row, col + i]);
       } else if (this.ship.orientation === 'vertical') {
-        cell = this.#gameboardUI.getCell([row - i, col]);
+        cell = this.#gameboardUI.getCell([row + i, col]);
+      } else {
+        throw new Error('Cannot place placeholder.', { cause: 'Uknown ship orientation.' });
       }
 
-      if (!cell) {
-        return false; // Out of bounds
+      if (cell && !cell.classList.contains('ship')) {
+        placeholderCells.push(cell);
+      } else {
+        return this.removeShipPlaceholder();
       }
     }
 
-    return true; // Within bounds
+    placeholderCells.forEach((cell) => {
+      cell.classList.add('placeholder');
+      cell.style.backgroundColor = this.cellColours.placeholder;
+    });
   }
 
-  placeShip([row, col]) {
-    const cell = this.#gameboardUI.getCell([row, col]);
+  removeShipPlaceholder() {
+    this.#gameboardUI.render();
+    const placeholderCells = document.querySelectorAll('.cell.placeholder');
 
-    if (cell !== this.#shipElement.parentElement) {
-      if (!this.isWithinBounds([row, col])) {
-        throw new Error('Out of bounds!');
-      }
-
-      const ship = this.#shipElement;
-
-      // Ensure the position styles are set correctly
-      cell.style.position = 'relative';
-      ship.style.position = 'absolute';
-
-      cell.append(ship);
+    if (placeholderCells) {
+      placeholderCells.forEach((cell) => {
+        cell.classList.remove('placeholder');
+      });
     }
   }
 
