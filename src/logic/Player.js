@@ -17,7 +17,11 @@ class Player {
   }
 
   get opponent() {
-    return this.#opponent ? this.#opponent.name : null;
+    return this.#opponent;
+  }
+
+  get gameboard() {
+    return this.#gameboard;
   }
 
   attack([row, col]) {
@@ -38,7 +42,6 @@ class Player {
 
   reset() {
     this.#gameboard.resetBoard();
-
     this.#opponent = null;
   }
 

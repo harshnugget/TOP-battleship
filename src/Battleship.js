@@ -32,14 +32,14 @@ class Battleship {
     return { id, ships: playerShips, gameboard, player };
   };
 
-  constructor(player1Name, player2Name, logMessages = false) {
+  constructor(player1Name, player2Name) {
     this.#players = [
-      Battleship.createPlayer(player1Name, 1),
-      Battleship.createPlayer(player2Name, 2),
+      Battleship.createPlayer(player1Name || 'Player 1', 1),
+      Battleship.createPlayer(player2Name || 'Player 2', 2),
     ];
 
     this.#controller = new GameController(this.#players[0].player, this.#players[1].player);
-    this.logMessages = Boolean(logMessages);
+    this.logMessages = true;
   }
 
   get activePlayer() {
@@ -107,7 +107,9 @@ class Battleship {
   }
 
   resetGame() {
-    if (!this.gameInProgress) return;
+    if (this.gameInProgress) {
+      return this.logMessage('Cannot reset. Game is in progress.', 'error');
+    }
 
     try {
       this.#controller.resetGame();
@@ -125,6 +127,7 @@ class Battleship {
       const hit = this.#controller.attack([row, col]);
       const message = `Player ${this.getPlayerId(activePlayer)} ${hit ? 'hit' : 'missed'} a target at: [${row}, ${col}]`;
 
+      console.clear();
       this.printBoard(1, true);
       this.printBoard(2, true);
 

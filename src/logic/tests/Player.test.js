@@ -39,11 +39,11 @@ describe('Player', () => {
   });
 
   test('Setting an opponent', () => {
-    expect(player1.opponent).toBe(player2.name);
+    expect(player1.opponent).toBe(player2);
 
     // Set an opponent that isn't an instance of Player
     expect(() => (player1.opponent = { name: 'Player 2' })).toThrow();
-    expect(player2.opponent).toBe(player1.name);
+    expect(player2.opponent).toBe(player1);
   });
 
   test('Receive an attack', () => {

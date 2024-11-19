@@ -131,6 +131,8 @@ class BattleshipUI {
   }
 
   hideShips(playerId, isHidden = true) {
+    if (!this.gameInProgress && this.winner) return;
+
     const { gameboardUI, ships } = this.getPlayerData(playerId);
 
     gameboardUI.hideShips(isHidden);
