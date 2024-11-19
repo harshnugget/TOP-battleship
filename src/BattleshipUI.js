@@ -158,6 +158,11 @@ class BattleshipUI {
     this.render();
   }
 
+  guess() {
+    this.#battleship.guess();
+    this.render();
+  }
+
   placeShip(playerId, type, coordinates, orientation) {
     this.#battleship.placeShip(playerId, type, coordinates, orientation);
     this.render();

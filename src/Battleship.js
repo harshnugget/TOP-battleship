@@ -42,6 +42,10 @@ class Battleship {
     this.logMessages = true;
   }
 
+  get players() {
+    return { player1: this.#players[0].player, player2: this.#players[1].player };
+  }
+
   get activePlayer() {
     return this.#controller.activePlayer;
   }
@@ -141,6 +145,10 @@ class Battleship {
     } else {
       this.prompt();
     }
+  }
+
+  guess() {
+    return this.#controller.guess();
   }
 
   getPlayerId(player) {
