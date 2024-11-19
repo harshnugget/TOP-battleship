@@ -79,13 +79,12 @@ describe('Gameboard', () => {
     gameboard.placeShip(ship, [3, 0], 'vertical');
     expect(gameboard.ships.includes(ship)).toBe(true);
 
-    expect(gameboard.coordinates[4][0].ship).not.toBe(ship);
+    expect(gameboard.coordinates[2][0].ship).not.toBe(ship);
     expect(gameboard.coordinates[3][0].ship).toBe(ship);
-    expect(gameboard.coordinates[2][0].ship).toBe(ship);
-    expect(gameboard.coordinates[1][0].ship).not.toBe(ship);
+    expect(gameboard.coordinates[4][0].ship).toBe(ship);
 
     // Attempt to place a ship that overflows bounds
-    expect(() => gameboard.placeShip(mockShip(5), [3, 1], 'vertical')).toThrow('out of bounds');
+    expect(() => gameboard.placeShip(mockShip(5), [6, 1], 'vertical')).toThrow('out of bounds');
     expect(ship.coordinates.length).toBe(2);
   });
 
@@ -93,7 +92,7 @@ describe('Gameboard', () => {
     const ship = mockShip(2);
 
     expect(() => gameboard.placeShip(ship, [0, 9], 'horizontal')).toThrow();
-    expect(() => gameboard.placeShip(ship, [0, 0], 'vertical')).toThrow();
+    expect(() => gameboard.placeShip(ship, [9, 0], 'vertical')).toThrow();
   });
 
   test.only('Receiving an attack at empty coordinates', () => {

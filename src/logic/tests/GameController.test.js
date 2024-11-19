@@ -18,7 +18,10 @@ describe('Game Controller', () => {
     controller = new GameController(player1, player2);
   });
 
-  test.only('Starting the game', () => {
+  test('Starting the game', () => {
+    // Attempt to attack before game has started
+    expect(() => controller.attack([0, 0])).toThrow();
+
     // Game should not start if all ships are not placed
     expect(() => controller.startGame()).toThrow();
 
@@ -28,12 +31,12 @@ describe('Game Controller', () => {
       });
     });
 
-    // After placing all ships, the game should be ready
+    // After placing all ships, start the game
     expect(() => controller.startGame()).not.toThrow();
     expect(controller.gameInProgress).toBe(true);
   });
 
-  test.only('Switching turns', () => {
+  test('Switching turns', () => {
     expect(controller.activePlayer).toBe(player1);
     controller.switchTurn();
     expect(controller.activePlayer).toBe(player2);
@@ -41,7 +44,7 @@ describe('Game Controller', () => {
     expect(controller.activePlayer).toBe(player1);
   });
 
-  describe.only('Attacking', () => {
+  describe('Attacking', () => {
     test('Missed a target', () => {
       expect(controller.activePlayer).toBe(player1);
 

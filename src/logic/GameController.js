@@ -69,32 +69,18 @@ class GameController {
   }
 
   attack([row, col]) {
-    if (!this.#gameInProgress) {
-      this.startGame();
-    }
-
-    let successfulShot;
-    const activePlayer = this.#activePlayer;
-
     try {
-      successfulShot = activePlayer.attack([row, col]);
-
-      if (successfulShot !== true && successfulShot !== false) {
-        throw Error(
-          `activePlayer.attack(coordinates) must return true or false!\nReceived: ${successfulShot}`
-        );
+      if (!this.gameInProgress) {
+        throw new Error('Game has not started.');
       }
+
+      const hit = this.#activePlayer.attack([row, col]);
+      if (!this.gameHasWinner()) this.switchTurn();
+
+      return hit;
     } catch (error) {
-      throw Error(`Could not attack this position.`, { cause: error });
+      throw Error('Could not attack this position.', { cause: error });
     }
-
-    // Switch turn if no winners
-    if (!this.gameHasWinner()) {
-      this.switchTurn();
-    }
-
-    // Return true if successful shot, else false if missed shot
-    return successfulShot;
   }
 
   gameHasWinner() {
