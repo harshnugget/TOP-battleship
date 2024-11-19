@@ -52,8 +52,6 @@ class Player {
   }
 
   getGuess() {
-    const gameboardSize = this.#gameboard.size;
-
     const getAdjacentCoords = ([row, col]) => {
       const top = [row - 1, col];
       const bottom = [row + 1, col];
@@ -62,7 +60,7 @@ class Player {
 
       // Validate bounds
       [top, bottom, right, left].forEach((coord) => {
-        const valid = coord.every((pos) => pos >= 0 && pos < gameboardSize);
+        const valid = coord.every((pos) => pos >= 0 && pos < this.#gameboard.size);
 
         if (!valid) {
           coord.length = 0;
@@ -72,14 +70,12 @@ class Player {
       return { top, bottom, right, left };
     };
 
-    // Check if the provided coordinate exists in an array of coordinates
     const coordInArray = ([row, col], coordinatesArray) => {
-      return coordinatesArray.some((coord) => {
-        return coord[0] === row && coord[1] === col;
+      return coordinatesArray.some(([r, c]) => {
+        return r === row && c === col;
       });
     };
 
-    // Return a random coordinate from an array of coordinates
     const getRandomCoordinate = (coordinatesArray) => {
       return coordinatesArray[Math.floor(Math.random() * coordinatesArray.length)];
     };
@@ -91,17 +87,19 @@ class Player {
       const [row, col] = this.hits[i];
       const { top, bottom, right, left } = getAdjacentCoords([row, col]);
       const pairs = [
-        [top, bottom],
-        [right, left],
+        [top, bottom], // Vertical
+        [right, left], // Horizontal
       ];
 
       for (const pair of pairs) {
         const unattackedTargets = [];
 
-        // Check if pair have not been attacked
-        pair.forEach((coord) => {
-          if (coordInArray(coord, this.potentialTargets)) {
-            unattackedTargets.push(coord);
+        // Store any unattacked pairs
+        pair.forEach((pair) => {
+          if (pair.length > 0) {
+            if (coordInArray(pair, this.potentialTargets)) {
+              unattackedTargets.push(pair);
+            }
           }
         });
 
@@ -109,10 +107,10 @@ class Player {
           targets.push(unattackedTargets[0], unattackedTargets[1]);
         } else if (unattackedTargets.length === 1) {
           // Get the pair member attacked
-          const memberAttacked = unattackedTargets[0] === pair[0] ? pair[1] : pair[0];
+          const attackedTarget = unattackedTargets[0] === pair[0] ? pair[1] : pair[0];
 
           // If the pair member is an attacked ship, set it as the only target and set priority flag to true
-          if (coordInArray(memberAttacked, this.hits)) {
+          if (coordInArray(attackedTarget, this.hits)) {
             targets.length = 0;
             targets.push(unattackedTargets[0]);
             priorityTarget = true;
