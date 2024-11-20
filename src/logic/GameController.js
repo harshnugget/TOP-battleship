@@ -37,10 +37,10 @@ class GameController {
   resetGame() {
     this.#player1.reset();
     this.#player2.reset();
-    this.#player1.opponent = this.player2;
-    this.#player2.opponent = this.player1;
+    this.#player1.opponent = this.#player2;
+    this.#player2.opponent = this.#player1;
     this.#winner = null;
-    this.#activePlayer = this.player1;
+    this.#activePlayer = this.#player1;
     this.#gameInProgress = false;
   }
 

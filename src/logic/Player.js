@@ -46,6 +46,7 @@ class Player {
 
     // Remove this coordinate from potential targets
     const index = this.potentialTargets.findIndex((coord) => coord[0] === row && coord[1] === col);
+
     this.potentialTargets.splice(index, 1);
 
     return hit;
@@ -145,6 +146,14 @@ class Player {
   reset() {
     this.#gameboard.resetBoard();
     this.#opponent = null;
+    this.hits.length = 0;
+    this.misses.length = 0;
+    this.potentialTargets.length = 0;
+
+    // Populate potential targets
+    this.#gameboard.coordinates.forEach((row, rowIndex) => {
+      row.forEach((col, colIndex) => this.potentialTargets.push([rowIndex, colIndex]));
+    });
   }
 
   printBoard(title = '', hideShips = false) {
