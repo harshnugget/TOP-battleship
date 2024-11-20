@@ -237,12 +237,13 @@ class BattleshipUI {
       // Helper function to handle ship placement
       const handleShipPlacement = (type, ship, cellIndex) => {
         const coordinates = getPlacementCoordinates(ship.orientation, cellIndex);
+        cellDraggedOver = null;
+
         if (coordinates) {
           const [row, col] = coordinates;
           const cell = gameboardUI.getCell([row, col]);
           if (cell) {
             this.placeShip(player.id, type, [row, col], ship.orientation);
-            cellDraggedOver = null;
           }
         }
       };

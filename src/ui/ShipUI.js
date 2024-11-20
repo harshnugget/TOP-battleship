@@ -110,12 +110,16 @@ class ShipUI {
     cell.style.position = 'relative';
     ship.style.position = 'absolute';
 
+    this.#shipElement.style.visibility = '';
+
     cell.append(ship);
     this.removeShipPlaceholder();
   }
 
   placeShipPlaceholder([row, col]) {
     const placeholderCells = [];
+
+    this.#shipElement.style.visibility = 'hidden';
 
     this.removeShipPlaceholder();
 
