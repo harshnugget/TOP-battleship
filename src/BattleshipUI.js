@@ -32,6 +32,11 @@ class BattleshipUI {
     this.#battleship = battleship;
 
     this.createUI(container);
+
+    if (battleship.singlePlayer) {
+      console.log('here');
+      this.hideShips(2);
+    }
   }
 
   get activePlayer() {

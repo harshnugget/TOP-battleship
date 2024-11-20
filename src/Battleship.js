@@ -32,14 +32,20 @@ class Battleship {
     return { id, ships: playerShips, gameboard, player };
   };
 
-  constructor(player1Name, player2Name) {
+  constructor(player1Name = 'Player 1', player2Name = 'Player 2', singlePlayer = true) {
     this.#players = [
-      Battleship.createPlayer(player1Name || 'Player 1', 1),
-      Battleship.createPlayer(player2Name || 'Player 2', 2),
+      Battleship.createPlayer(player1Name, 1),
+      Battleship.createPlayer(player2Name, 2),
     ];
 
     this.#controller = new GameController(this.#players[0].player, this.#players[1].player);
     this.logMessages = true;
+
+    this.singlePlayer = singlePlayer;
+
+    if (this.singlePlayer) {
+      this.placeAllShips(2);
+    }
   }
 
   get players() {
@@ -123,6 +129,10 @@ class Battleship {
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');
     }
+
+    if (this.singlePlayer) {
+      this.placeAllShips(2);
+    }
   }
 
   attack(row, col) {
@@ -144,6 +154,10 @@ class Battleship {
       this.logMessage(`Player ${this.getPlayerId(this.#controller.winner)} has won!`);
     } else {
       this.prompt();
+    }
+
+    if (this.singlePlayer && this.#controller.activePlayer === this.#players[1].player) {
+      this.guess();
     }
   }
 
