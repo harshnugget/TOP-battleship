@@ -32,6 +32,11 @@ class BattleshipUI {
     this.#battleship = battleship;
 
     this.createUI(container);
+
+    if (battleship.singlePlayer) {
+      console.log('here');
+      this.hideShips(2);
+    }
   }
 
   get activePlayer() {
@@ -158,6 +163,11 @@ class BattleshipUI {
     this.render();
   }
 
+  guess() {
+    this.#battleship.guess();
+    this.render();
+  }
+
   placeShip(playerId, type, coordinates, orientation) {
     this.#battleship.placeShip(playerId, type, coordinates, orientation);
     this.render();
@@ -227,12 +237,13 @@ class BattleshipUI {
       // Helper function to handle ship placement
       const handleShipPlacement = (type, ship, cellIndex) => {
         const coordinates = getPlacementCoordinates(ship.orientation, cellIndex);
+        cellDraggedOver = null;
+
         if (coordinates) {
           const [row, col] = coordinates;
           const cell = gameboardUI.getCell([row, col]);
           if (cell) {
             this.placeShip(player.id, type, [row, col], ship.orientation);
-            cellDraggedOver = null;
           }
         }
       };

@@ -32,7 +32,7 @@ class Battleship {
     return { id, ships: playerShips, gameboard, player };
   };
 
-  constructor(player1Name, player2Name) {
+  constructor(player1Name = 'Player 1', player2Name = 'Player 2', singlePlayer = true) {
     this.#players = [
       Battleship.createPlayer(player1Name || 'Player 1', 1),
       Battleship.createPlayer(player2Name || 'Player 2', 2),
@@ -40,6 +40,16 @@ class Battleship {
 
     this.#controller = new GameController(this.#players[0].player, this.#players[1].player);
     this.logMessages = true;
+
+    this.singlePlayer = singlePlayer;
+
+    if (this.singlePlayer) {
+      this.placeAllShips(2);
+    }
+  }
+
+  get players() {
+    return { player1: this.#players[0].player, player2: this.#players[1].player };
   }
 
   get activePlayer() {
@@ -119,6 +129,10 @@ class Battleship {
     } catch (error) {
       this.logMessage(this.formatErrorMsg(error), 'error');
     }
+
+    if (this.singlePlayer) {
+      this.placeAllShips(2);
+    }
   }
 
   attack(row, col) {
@@ -141,6 +155,14 @@ class Battleship {
     } else {
       this.prompt();
     }
+
+    if (this.singlePlayer && this.#controller.activePlayer === this.#players[1].player) {
+      this.guess();
+    }
+  }
+
+  guess() {
+    return this.#controller.guess();
   }
 
   getPlayerId(player) {
