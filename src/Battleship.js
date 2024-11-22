@@ -99,8 +99,10 @@ class Battleship {
 
     try {
       gameboard.placeShip(ships[type].ship, coordinates, orientation);
+      return true;
     } catch (error) {
       console.error(error);
+      return false;
     }
   }
 

@@ -27,13 +27,11 @@ const createShipElement = (length) => {
 };
 
 class ShipUI {
-  #parentContainer;
   #gameboardUI;
   #shipElement;
   #ship;
 
-  constructor(ship, gameboardUI, parentContainer) {
-    this.#parentContainer = parentContainer;
+  constructor(ship, gameboardUI) {
     this.#gameboardUI = gameboardUI;
     this.#ship = ship;
     this.hidden = false;
@@ -45,10 +43,6 @@ class ShipUI {
     };
 
     this.#shipElement = this.createShip(ship.length);
-  }
-
-  get parentContainer() {
-    return this.#parentContainer;
   }
 
   get gameboard() {
@@ -81,9 +75,6 @@ class ShipUI {
       cell.style.border = cellStyles.border;
       cell.style.backgroundColor = this.cellColours.ship;
     });
-
-    // Append the container to the parent element
-    this.#parentContainer.append(shipElement);
 
     return shipElement;
   }
@@ -168,17 +159,10 @@ class ShipUI {
   resetShip() {
     const element = this.#shipElement;
 
-    // Remove absolute positioning
-    element.style.position = '';
-
     element.childNodes.forEach((cell) => {
       cell.classList.remove('hit');
       cell.style.backgroundColor = this.cellColours.ship;
     });
-
-    this.setOrientation('horizontal');
-
-    this.#parentContainer.append(element);
   }
 
   hideShip(isHidden = true) {
@@ -214,9 +198,6 @@ class ShipUI {
           this.receiveHit(cellIndex);
         }
       });
-    } else {
-      // If ship has no coordinates, reset it
-      this.resetShip();
     }
   }
 }

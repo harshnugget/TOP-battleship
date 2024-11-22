@@ -7,12 +7,12 @@ class BattleshipUI {
   // Containers for the gameboard and ships UI
   static createContainers() {
     const gameboardContainer = document.createElement('div');
-    const shipsContainer = document.createElement('div');
 
     gameboardContainer.classList.add('gameboard-container');
-    shipsContainer.classList.add('ships-container');
 
-    return { gameboardContainer, shipsContainer };
+    gameboardContainer.style.width = 'max-content';
+
+    return { gameboardContainer };
   }
 
   static createButton({ text, id, className, onClick, styles = {} }) {
@@ -36,6 +36,9 @@ class BattleshipUI {
     if (battleship.singlePlayer) {
       this.hideShips(2);
     }
+
+    this.addGameboardEventListeners();
+    this.resetGame();
   }
 
   get activePlayer() {
@@ -74,16 +77,10 @@ class BattleshipUI {
     };
 
     const createPlayerButtons = (playerId) => {
-      const placeShipsButton = BattleshipUI.createButton({
-        text: 'Place Ships',
-        className: 'place-ships-button',
+      const randomizeButton = BattleshipUI.createButton({
+        text: 'Randomize',
+        className: 'randomize-button',
         onClick: () => this.placeAllShips(playerId),
-      });
-
-      const resetShipsButton = BattleshipUI.createButton({
-        text: 'Reset Ships',
-        className: 'reset-ships-button',
-        onClick: () => this.resetAllShips(playerId),
       });
 
       const toggleShipsButton = BattleshipUI.createButton({
@@ -104,7 +101,7 @@ class BattleshipUI {
         })(),
       });
 
-      return { placeShipsButton, resetShipsButton, toggleShipsButton };
+      return { randomizeButton, toggleShipsButton };
     };
 
     // Create start and reset buttons
@@ -118,7 +115,7 @@ class BattleshipUI {
 
     // Create UI for each player
     players.forEach((player) => {
-      const { gameboardContainer, shipsContainer } = BattleshipUI.createContainers();
+      const { gameboardContainer } = BattleshipUI.createContainers();
       const gameboard = player.gameboard;
       const ships = player.ships;
       const playerButtons = createPlayerButtons(player.id);
@@ -133,20 +130,23 @@ class BattleshipUI {
       gameboardUI.render();
 
       Object.values(ships).forEach((value) => {
-        const shipUI = new ShipUI(value.ship, gameboardUI, shipsContainer);
+        const shipUI = new ShipUI(value.ship, gameboardUI);
         Object.assign(value, { shipUI });
 
         shipUI.render();
       });
 
+      gameboardContainer.classList.add(`p${player.id}`);
       gameboardContainer.append(playerButtonsContainer);
-      gameboardContainer.append(shipsContainer);
       container.append(gameboardContainer);
 
-      // If singleplayer is enabled, hide player 2 ships
+      // If singleplayer is enabled, hide player 2 ships and disable buttons
       if (this.#battleship.singleplayer && player.id === 2) {
-        const { toggleShipsButton } = playerButtons;
+        const { randomizeButton, toggleShipsButton } = playerButtons;
         toggleShipsButton.click();
+        randomizeButton.disabled = true;
+        toggleShipsButton.disabled = true;
+        randomizeButton.disabled = true;
       }
     });
   }
@@ -171,7 +171,12 @@ class BattleshipUI {
 
   resetGame() {
     this.#battleship.resetGame();
-    this.render();
+
+    [1, 2].forEach((playerId) => {
+      const { ships } = this.getPlayerData(playerId);
+      Object.values(ships).forEach(({ shipUI }) => shipUI.resetShip());
+      this.placeAllShips(playerId);
+    });
   }
 
   attack(row, col) {
@@ -195,6 +200,8 @@ class BattleshipUI {
   }
 
   resetShip(playerId, type) {
+    const { ships } = this.getPlayerData(playerId);
+    ships[type].shipUI.resetShip();
     this.#battleship.resetShip(playerId, type);
     this.render();
   }
@@ -205,6 +212,8 @@ class BattleshipUI {
   }
 
   resetAllShips(playerId) {
+    const { ships } = this.getPlayerData(playerId);
+    Object.values(ships).forEach(({ shipUI }) => shipUI.resetShip());
     this.#battleship.resetAllShips(playerId);
     this.render();
   }
@@ -261,7 +270,7 @@ class BattleshipUI {
           if (cell) {
             this.placeShip(player.id, type, [row, col], ship.orientation);
           } else {
-            this.resetShip(player.id, type);
+            this.render();
           }
         }
       };
@@ -319,8 +328,10 @@ class BattleshipUI {
             const shipCell = getElement(event, 'cell', shipElement);
 
             // Remove the ship from gameboard during drag operation
+            const prevCoords = ship.coordinates;
             const prevOrientation = ship.orientation;
             this.#battleship.resetShip(player.id, type);
+            ship.coordinates = prevCoords;
             ship.orientation = prevOrientation;
 
             // Store the index of the ship cell
