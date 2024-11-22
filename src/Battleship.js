@@ -32,94 +32,55 @@ class Battleship {
     return { id, ships: playerShips, gameboard, player };
   };
 
-  constructor(player1Name, player2Name, logMessages = false) {
+  constructor(player1Name, player2Name) {
     this.#players = [
-      Battleship.createPlayer(player1Name, 1),
-      Battleship.createPlayer(player2Name, 2),
+      Battleship.createPlayer(player1Name || 'Player 1', 1),
+      Battleship.createPlayer(player2Name || 'Player 2', 2),
     ];
 
-    this.#controller = new GameController(this.#players[0].player, this.#players[1].player);
-    this.logMessages = Boolean(logMessages);
-  }
-
-  logMessage(message, level = 'info') {
-    if (this.logMessages && message) {
-      switch (level) {
-        case 'warn':
-          console.warn(message);
-          break;
-        case 'error':
-          console.error(message);
-          break;
-        default:
-          console.log(message);
-      }
-    }
-  }
-
-  formatErrorMsg(error) {
-    if (!error || !error.message) {
-      return 'An unknown error occurred.';
-    }
-
-    return `${error.message}${error.cause ? `\n${error.cause.message}` : ''}`;
-  }
-
-  prompt() {
-    if (this.#controller.gameInProgress === true) {
-      this.logMessage(
-        `Waiting for Player ${this.getPlayerId(this.#controller.activePlayer)} to attack: `
-      );
+    if (!player2Name) {
+      // Singleplayer enabled
+      this.#controller = new GameController(this.#players[0].player, this.#players[1].player, true);
     } else {
-      this.logMessage('Waiting for game to begin.');
+      // Singleplayer disabled
+      this.#controller = new GameController(
+        this.#players[0].player,
+        this.#players[1].player,
+        false
+      );
     }
   }
 
-  validateAction(action) {
-    if (this.#controller.gameInProgress)
-      throw Error(`Cannot execute "${action}" while game is in progress!`);
+  get players() {
+    return { player1: this.#players[0].player, player2: this.#players[1].player };
+  }
+
+  get activePlayer() {
+    return this.#controller.activePlayer;
+  }
+
+  get winner() {
+    return this.#controller.winner;
+  }
+
+  get gameInProgress() {
+    return this.#controller.gameInProgress;
+  }
+
+  get singleplayer() {
+    return this.#controller.singleplayer;
   }
 
   startGame() {
-    try {
-      this.validateAction('start game');
-      this.#controller.startGame();
-      this.logMessage('Game started.');
-      this.prompt();
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    this.#controller.startGame();
   }
 
   resetGame() {
-    try {
-      this.validateAction('reset game');
-      this.#controller.resetGame();
-      this.resetAllShips(1);
-      this.resetAllShips(2);
-      this.logMessage('Game reset.');
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    this.#controller.resetGame();
   }
 
   attack(row, col) {
-    try {
-      const activePlayer = this.#controller.activePlayer;
-      const hit = this.#controller.attack([row, col]);
-      const message = `Player ${this.getPlayerId(activePlayer)} ${hit ? 'hit' : 'missed'} a target at: [${row}, ${col}]`;
-      this.printBoard(1, true);
-      this.printBoard(2, true);
-      this.logMessage(`${message}`);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
-
-    if (this.#controller.gameHasWinner()) {
-      this.logMessage(`Player ${this.getPlayerId(this.#controller.winner)} has won!`);
-    } else {
-      this.prompt();
-    }
+    this.#controller.attack([row, col]);
   }
 
   getPlayerId(player) {
@@ -129,64 +90,53 @@ class Battleship {
   getPlayerData(id) {
     const player = this.#players[id - 1];
     if (!player) throw new Error(`Invalid player ID: ${id}`);
+
     return player;
   }
 
-  printBoard(id, hideShips = false) {
+  placeShip(playerId, type, coordinates, orientation) {
+    const { ships, gameboard } = this.getPlayerData(playerId);
+
     try {
-      const { player } = this.getPlayerData(id);
-      player.printBoard(`Player ${id} Board:`, hideShips);
+      gameboard.placeShip(ships[type].ship, coordinates, orientation);
     } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
+      console.error(error);
     }
   }
 
-  placeShip(playerId, type, coordinates, orientation) {
+  rotateShip(playerId, type) {
+    const { gameboard, ships } = this.getPlayerData(playerId);
+    const ship = ships[type].ship;
+
+    const coordinates = ship.coordinates;
+    const newOrientation = ship.orientation === 'horizontal' ? 'vertical' : 'horizontal';
+
     try {
-      this.validateAction('place ship');
-      const { ships, gameboard } = this.getPlayerData(playerId);
-      gameboard.placeShip(ships[type].ship, coordinates, orientation);
-      this.logMessage(`Placed ${type} at [${coordinates[0]}, ${coordinates[1]}]`);
+      if (coordinates.length > 0) gameboard.placeShip(ship, coordinates[0], newOrientation);
     } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
+      console.error(error);
     }
   }
 
   resetShip(playerId, type) {
-    try {
-      this.validateAction('reset ship');
-      const { ships, gameboard } = this.getPlayerData(playerId);
-      gameboard.resetShip(ships[type].ship);
-      this.logMessage(`Removed ${type} from gameboard.`);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    const { ships, gameboard } = this.getPlayerData(playerId);
+    const ship = ships[type].ship;
+
+    gameboard.resetShip(ship);
   }
 
   placeAllShips(playerId) {
-    try {
-      this.validateAction('place all ships');
-      const { ships, gameboard } = this.getPlayerData(playerId);
-      Object.values(ships).forEach(({ ship }) => {
-        gameboard.placeShipRandom(ship);
-      });
-      this.logMessage(`Placed all ships for Player ${playerId}.`);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    const { ships, gameboard } = this.getPlayerData(playerId);
+    Object.values(ships).forEach(({ ship }) => {
+      gameboard.placeShipRandom(ship);
+    });
   }
 
   resetAllShips(playerId) {
-    try {
-      this.validateAction('reset all ships');
-      const { ships, gameboard } = this.getPlayerData(playerId);
-      Object.values(ships).forEach(({ ship }) => {
-        gameboard.resetShip(ship);
-      });
-      this.logMessage(`Reset all ships for Player ${playerId}.`);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    const { ships, gameboard } = this.getPlayerData(playerId);
+    Object.values(ships).forEach(({ ship }) => {
+      gameboard.resetShip(ship);
+    });
   }
 }
 

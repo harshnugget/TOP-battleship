@@ -9,6 +9,7 @@ const createShipElement = (length) => {
   element.style.gridTemplateRows = `repeat(1, ${cellSize}px)`;
   element.style.width = 'max-content';
   element.style.height = 'max-content';
+  element.style.zIndex = '1';
 
   const createCellContainer = () => {
     const element = document.createElement('div');
@@ -40,6 +41,7 @@ class ShipUI {
     this.cellColours = {
       ship: gameboardUI.cellColours.ship,
       hit: gameboardUI.cellColours.hit,
+      placeholder: 'grey',
     };
 
     this.#shipElement = this.createShip(ship.length);
@@ -88,7 +90,7 @@ class ShipUI {
 
   setOrientation(orientation) {
     const element = this.#shipElement;
-    const length = element.querySelectorAll('.cell').length;
+    const length = this.ship.length;
 
     if (orientation === 'vertical') {
       element.style.gridTemplateColumns = `repeat(1, 40px)`;
@@ -99,15 +101,61 @@ class ShipUI {
     }
   }
 
-  placeShip(coordinates) {
-    const cell = this.#gameboardUI.getCell(coordinates);
+  placeShip([row, col]) {
+    const cell = this.#gameboardUI.getCell([row, col]);
+
     const ship = this.#shipElement;
 
     // Ensure the position styles are set correctly
     cell.style.position = 'relative';
     ship.style.position = 'absolute';
 
+    this.#shipElement.style.visibility = '';
+
     cell.append(ship);
+    this.removeShipPlaceholder();
+  }
+
+  placeShipPlaceholder([row, col]) {
+    const placeholderCells = [];
+
+    this.#shipElement.style.visibility = 'hidden';
+
+    this.removeShipPlaceholder();
+
+    for (let i = 0; i < this.ship.length; i++) {
+      let cell;
+
+      if (this.ship.orientation === 'horizontal') {
+        cell = this.#gameboardUI.getCell([row, col + i]);
+      } else if (this.ship.orientation === 'vertical') {
+        cell = this.#gameboardUI.getCell([row + i, col]);
+      } else {
+        throw new Error('Cannot place placeholder.', { cause: 'Uknown ship orientation.' });
+      }
+
+      if (cell && !cell.classList.contains('ship')) {
+        placeholderCells.push(cell);
+      } else {
+        return this.removeShipPlaceholder();
+      }
+    }
+
+    placeholderCells.forEach((cell) => {
+      cell.classList.add('placeholder');
+      cell.style.backgroundColor = this.cellColours.placeholder;
+    });
+  }
+
+  removeShipPlaceholder() {
+    this.#gameboardUI.render();
+    const placeholderCells = document.querySelectorAll('.cell.placeholder');
+
+    if (placeholderCells) {
+      placeholderCells.forEach((cell) => {
+        cell.classList.remove('placeholder');
+      });
+    }
   }
 
   receiveHit(cellIndex) {

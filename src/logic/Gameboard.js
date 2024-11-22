@@ -58,14 +58,36 @@ class Gameboard {
   }
 
   hasShip(ship) {
-    return !this.ships.includes(ship);
+    return this.ships.includes(ship);
   }
 
   placeShip(ship, [row, col], orientation) {
-    const validCoordinates = []; // Coordinates the ship will occupy
+    // Store previous ship data in case placement fails
+    const prevCoordinates = ship.coordinates;
+    const prevOrientation = ship.orientation;
 
-    // Reset the ship before placing
-    this.resetShip(ship);
+    // Coordinates the ship will occupy
+    const validCoordinates = [];
+
+    const applyPosition = (coordinates, orientation) => {
+      if (coordinates.length > 0) {
+        ship.orientation = orientation;
+        ship.coordinates = coordinates;
+
+        coordinates.forEach(([row, col]) => {
+          this.#coordinates[row][col].ship = ship;
+        });
+      } else {
+        this.resetShip(ship);
+      }
+    };
+
+    // Remove current ship position from the board
+    if (this.hasShip(ship) && ship.coordinates.length > 0) {
+      ship.coordinates.forEach(([row, col]) => {
+        this.#coordinates[row][col].ship = null;
+      });
+    }
 
     const validateCoordinates = ([row, col]) => {
       if (!this.isWithinBoundsAt([row, col])) {
@@ -81,40 +103,32 @@ class Gameboard {
       }
     };
 
-    if (orientation === 'horizontal') {
-      const endCol = col + ship.length;
-
-      // Increment columns until greater than endCol
-      for (let currentCol = col; currentCol < endCol; currentCol++) {
-        validateCoordinates([row, currentCol]);
-        validCoordinates.push([row, currentCol]);
+    for (let i = 0; i < ship.length; i++) {
+      try {
+        validateCoordinates([row, col]);
+        validCoordinates.push([row, col]);
+      } catch (error) {
+        applyPosition(prevCoordinates, prevOrientation);
+        throw error;
       }
-    } else if (orientation === 'vertical') {
-      const endRow = row - ship.length;
 
-      // Decrement rows until less than endRow
-      for (let currentRow = row; currentRow > endRow; currentRow--) {
-        validateCoordinates([currentRow, col]);
-        validCoordinates.push([currentRow, col]);
+      if (orientation === 'horizontal') {
+        col++;
+      } else if (orientation === 'vertical') {
+        row++;
+      } else {
+        throw new Error(
+          `Invalid orientation: ${orientation}\nMust be either "vertical" or "horizontal"`
+        );
       }
-    } else {
-      throw new Error(
-        `Invalid orientation: ${orientation}\nMust be either "vertical" or "horizontal"`
-      );
     }
 
     // Add the ship to the ships array if it doesn't already exist
-    if (this.hasShip(ship)) {
+    if (!this.hasShip(ship)) {
       this.ships.push(ship);
     }
 
-    // Assign the ship to each validated coordinate
-    validCoordinates.forEach(([row, col]) => {
-      this.#coordinates[row][col].ship = ship;
-    });
-
-    ship.orientation = orientation;
-    ship.coordinates = validCoordinates;
+    applyPosition(validCoordinates, orientation);
   }
 
   resetShip(ship) {
@@ -235,8 +249,16 @@ class Gameboard {
     const hitCell = 'H';
     const missCell = 'M';
 
-    for (let i = this.#size - 1; i >= 0; i--) {
-      let string = `Row ${i}:`.padEnd(10);
+    // Print column headers
+    let headerRow = '|   |'; // Empty space for alignment with row labels
+    for (let j = 0; j < this.#size; j++) {
+      headerRow += `| ${j} |`.padStart(4); // Adjust spacing as needed
+    }
+    console.log(headerRow);
+
+    // Print each row of the board
+    for (let i = 0; i < this.#size; i++) {
+      let string = `| ${i} |`;
       for (let j = 0; j < this.#size; j++) {
         if (this.coordinates[i][j].hit === true && this.coordinates[i][j].ship !== null) {
           string += `| ${hitCell} |`;
