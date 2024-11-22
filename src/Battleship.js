@@ -32,19 +32,22 @@ class Battleship {
     return { id, ships: playerShips, gameboard, player };
   };
 
-  constructor(player1Name = 'Player 1', player2Name = 'Player 2', singlePlayer = true) {
+  constructor(player1Name, player2Name) {
     this.#players = [
       Battleship.createPlayer(player1Name || 'Player 1', 1),
       Battleship.createPlayer(player2Name || 'Player 2', 2),
     ];
 
-    this.#controller = new GameController(this.#players[0].player, this.#players[1].player);
-    this.logMessages = true;
-
-    this.singlePlayer = singlePlayer;
-
-    if (this.singlePlayer) {
-      this.placeAllShips(2);
+    if (!player2Name) {
+      // Singleplayer enabled
+      this.#controller = new GameController(this.#players[0].player, this.#players[1].player, true);
+    } else {
+      // Singleplayer disabled
+      this.#controller = new GameController(
+        this.#players[0].player,
+        this.#players[1].player,
+        false
+      );
     }
   }
 
@@ -64,105 +67,20 @@ class Battleship {
     return this.#controller.gameInProgress;
   }
 
-  logMessage(message, level = 'info') {
-    if (this.logMessages && message) {
-      switch (level) {
-        case 'warn':
-          console.warn(message);
-          break;
-        case 'error':
-          console.error(message);
-          break;
-        default:
-          console.log(message);
-      }
-    }
-  }
-
-  formatErrorMsg(error) {
-    if (!error || !error.message) {
-      return 'An unknown error occurred.';
-    }
-
-    return `${error.message}${error.cause ? `\n${error.cause.message}` : ''}`;
-  }
-
-  prompt() {
-    if (this.gameInProgress === true) {
-      this.logMessage(
-        `Waiting for Player ${this.getPlayerId(this.#controller.activePlayer)} to attack: `
-      );
-    } else {
-      this.logMessage('Waiting for game to begin.');
-    }
-  }
-
-  validateAction(action) {
-    if (this.winner) {
-      throw Error(`Cannot execute ${action}! Game has ended.`);
-    } else if (this.gameInProgress) {
-      throw Error(`Cannot execute "${action}" while game is in progress!`);
-    }
+  get singleplayer() {
+    return this.#controller.singleplayer;
   }
 
   startGame() {
-    try {
-      this.validateAction('start game');
-      this.#controller.startGame();
-      this.logMessage('Game started.');
-      this.prompt();
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    this.#controller.startGame();
   }
 
   resetGame() {
-    if (this.gameInProgress) {
-      return this.logMessage('Cannot reset. Game is in progress.', 'error');
-    }
-
-    try {
-      this.#controller.resetGame();
-      this.resetAllShips(1);
-      this.resetAllShips(2);
-      this.logMessage('Game reset.');
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
-
-    if (this.singlePlayer) {
-      this.placeAllShips(2);
-    }
+    this.#controller.resetGame();
   }
 
   attack(row, col) {
-    try {
-      const activePlayer = this.#controller.activePlayer;
-      const hit = this.#controller.attack([row, col]);
-      const message = `Player ${this.getPlayerId(activePlayer)} ${hit ? 'hit' : 'missed'} a target at: [${row}, ${col}]`;
-
-      console.clear();
-      this.printBoard(1, true);
-      this.printBoard(2, true);
-
-      this.logMessage(`${message}`);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
-
-    if (this.#controller.gameHasWinner()) {
-      this.logMessage(`Player ${this.getPlayerId(this.#controller.winner)} has won!`);
-    } else {
-      this.prompt();
-    }
-
-    if (this.singlePlayer && this.#controller.activePlayer === this.#players[1].player) {
-      this.guess();
-    }
-  }
-
-  guess() {
-    return this.#controller.guess();
+    this.#controller.attack([row, col]);
   }
 
   getPlayerId(player) {
@@ -176,87 +94,49 @@ class Battleship {
     return player;
   }
 
-  printBoard(id, hideShips = false) {
-    try {
-      const { player } = this.getPlayerData(id);
-      player.printBoard(`Player ${id} Board:`, hideShips);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
-  }
-
   placeShip(playerId, type, coordinates, orientation) {
+    const { ships, gameboard } = this.getPlayerData(playerId);
+
     try {
-      this.validateAction('place ship');
-      const { ships, gameboard } = this.getPlayerData(playerId);
-
       gameboard.placeShip(ships[type].ship, coordinates, orientation);
-
-      this.logMessage(`Placed ${type} at [${coordinates[0]}, ${coordinates[1]}]`);
     } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
+      console.error(error);
     }
   }
 
   rotateShip(playerId, type) {
+    const { gameboard, ships } = this.getPlayerData(playerId);
+    const ship = ships[type].ship;
+
+    const coordinates = ship.coordinates;
+    const newOrientation = ship.orientation === 'horizontal' ? 'vertical' : 'horizontal';
+
     try {
-      this.validateAction('rotate ship');
-      const { gameboard, ships } = this.getPlayerData(playerId);
-      const ship = ships[type].ship;
-
-      const coordinates = ship.coordinates;
-      const newOrientation = ship.orientation === 'horizontal' ? 'vertical' : 'horizontal';
-
       if (coordinates.length > 0) gameboard.placeShip(ship, coordinates[0], newOrientation);
     } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
+      console.error(error);
     }
   }
 
   resetShip(playerId, type) {
-    try {
-      this.validateAction('reset ship');
-      const { ships, gameboard } = this.getPlayerData(playerId);
+    const { ships, gameboard } = this.getPlayerData(playerId);
+    const ship = ships[type].ship;
 
-      const ship = ships[type].ship;
-      const coordinates = ship.coordinates;
-
-      gameboard.resetShip(ship);
-
-      if (coordinates.length > 0) this.logMessage(`Removed ${type} from gameboard.`);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    gameboard.resetShip(ship);
   }
 
   placeAllShips(playerId) {
-    try {
-      this.validateAction('place all ships');
-      const { ships, gameboard } = this.getPlayerData(playerId);
-
-      Object.values(ships).forEach(({ ship }) => {
-        gameboard.placeShipRandom(ship);
-      });
-
-      this.logMessage(`Placed all ships for Player ${playerId}.`);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    const { ships, gameboard } = this.getPlayerData(playerId);
+    Object.values(ships).forEach(({ ship }) => {
+      gameboard.placeShipRandom(ship);
+    });
   }
 
   resetAllShips(playerId) {
-    try {
-      this.validateAction('reset all ships');
-
-      const { ships, gameboard } = this.getPlayerData(playerId);
-      Object.values(ships).forEach(({ ship }) => {
-        gameboard.resetShip(ship);
-      });
-
-      this.logMessage(`Reset all ships for Player ${playerId}.`);
-    } catch (error) {
-      this.logMessage(this.formatErrorMsg(error), 'error');
-    }
+    const { ships, gameboard } = this.getPlayerData(playerId);
+    Object.values(ships).forEach(({ ship }) => {
+      gameboard.resetShip(ship);
+    });
   }
 }
 
