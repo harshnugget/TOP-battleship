@@ -4,17 +4,6 @@ import ShipUI from './ui/ShipUI.js';
 class BattleshipUI {
   #battleship;
 
-  // Containers for the gameboard and ships UI
-  static createContainers() {
-    const gameboardContainer = document.createElement('div');
-
-    gameboardContainer.classList.add('gameboard-container');
-
-    gameboardContainer.style.width = 'max-content';
-
-    return { gameboardContainer };
-  }
-
   static createButton({ text, id, className, onClick, styles = {} }) {
     const button = document.createElement('button');
     button.textContent = text;
@@ -64,13 +53,17 @@ class BattleshipUI {
       const startGameButton = BattleshipUI.createButton({
         text: 'Start Game',
         className: 'start-button',
-        onClick: () => this.startGame(),
+        onClick: () => {
+          this.startGame();
+        },
       });
 
       const resetGameButton = BattleshipUI.createButton({
         text: 'Reset Game',
         className: 'reset-button',
-        onClick: () => this.resetGame(),
+        onClick: () => {
+          this.resetGame();
+        },
       });
 
       return { startGameButton, resetGameButton };
@@ -105,22 +98,26 @@ class BattleshipUI {
     };
 
     // Create start and reset buttons
-    const mainButtons = createMainButtons();
+    const { startGameButton, resetGameButton } = createMainButtons();
     const mainButtonsContainer = document.createElement('div');
 
     mainButtonsContainer.classList.add('main-buttons-container');
-    Object.values(mainButtons).forEach((Button) => mainButtonsContainer.append(Button));
+    [startGameButton, resetGameButton].forEach((Button) => mainButtonsContainer.append(Button));
+
+    // Reset button disabled until game started
+    resetGameButton.disabled = true;
 
     container.append(mainButtonsContainer);
 
     // Create UI for each player
     players.forEach((player) => {
-      const { gameboardContainer } = BattleshipUI.createContainers();
+      const gameboardContainer = document.createElement('div');
       const gameboard = player.gameboard;
       const ships = player.ships;
       const playerButtons = createPlayerButtons(player.id);
       const playerButtonsContainer = document.createElement('div');
 
+      gameboardContainer.classList.add('gameboard-container');
       playerButtonsContainer.classList.add('player-buttons-container');
       Object.values(playerButtons).forEach((Button) => playerButtonsContainer.append(Button));
 
@@ -166,15 +163,28 @@ class BattleshipUI {
   }
 
   startGame() {
+    const startBtn = document.querySelector('.start-button');
+    const resetBtn = document.querySelector('.reset-button');
+    startBtn.disabled = true;
+    resetBtn.disabled = false;
+
     this.#battleship.startGame();
   }
 
   resetGame() {
+    const startBtn = document.querySelector('.start-button');
+    const resetBtn = document.querySelector('.reset-button');
+    startBtn.disabled = false;
+    resetBtn.disabled = true;
+
     this.#battleship.resetGame();
 
     [1, 2].forEach((playerId) => {
       const { ships } = this.getPlayerData(playerId);
-      Object.values(ships).forEach(({ shipUI }) => shipUI.resetShip());
+      Object.values(ships).forEach(({ shipUI }) => {
+        shipUI.resetShip();
+        shipUI.shipElement.draggable = true;
+      });
       this.placeAllShips(playerId);
     });
   }

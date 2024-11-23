@@ -128,6 +128,10 @@ class Battleship {
   }
 
   placeAllShips(playerId) {
+    if (this.gameInProgress || this.winner) {
+      return false;
+    }
+
     const { ships, gameboard } = this.getPlayerData(playerId);
     Object.values(ships).forEach(({ ship }) => {
       gameboard.placeShipRandom(ship);
