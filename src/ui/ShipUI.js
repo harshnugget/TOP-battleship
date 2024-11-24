@@ -11,7 +11,7 @@ const createShipElement = (length) => {
   element.style.height = 'max-content';
   element.style.zIndex = '1';
 
-  const createCellContainer = () => {
+  const createCell = () => {
     const element = document.createElement('div');
     element.classList.add('cell');
 
@@ -19,8 +19,8 @@ const createShipElement = (length) => {
   };
 
   for (let i = 0; i < length; i++) {
-    const cellContainer = createCellContainer();
-    element.append(cellContainer);
+    const cell = createCell();
+    element.append(cell);
   }
 
   return element;

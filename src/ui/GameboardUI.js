@@ -7,15 +7,22 @@ const createGameboardElement = (size) => {
   element.classList.add('gameboard');
 
   element.style.display = 'grid';
-  element.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
-  element.style.gridTemplateRows = `repeat(${size}, ${cellSize}px)`;
+  element.style.gridTemplateColumns = `repeat(${size + 1}, ${cellSize}px)`;
+  element.style.gridTemplateRows = `repeat(${size + 1}, ${cellSize}px)`;
   element.style.border = '1px solid black';
   element.style.width = 'max-content';
   element.style.height = 'max-content';
-  element.style.gap = '1px';
+  element.style.gap = '0px';
   element.style.zIndex = '0';
 
-  const createCellContainer = () => {
+  const createBorderCell = () => {
+    const element = document.createElement('div');
+    element.classList.add('border-cell');
+    element.style.border = '1px solid red';
+    return element;
+  };
+
+  const createCell = () => {
     const element = document.createElement('div');
     element.classList.add('cell');
     element.style.border = '1px solid black';
@@ -23,11 +30,30 @@ const createGameboardElement = (size) => {
   };
 
   for (let row = 0; row < size; row++) {
+    // Create column border cells A-J
+    if (row === 0) {
+      for (let head = 0; head < size + 1; head++) {
+        const borderCell = createBorderCell();
+        if (head > 0) {
+          borderCell.innerHTML = `&#${65 + head - 1}`;
+        }
+        element.append(borderCell);
+      }
+    }
+
     for (let col = 0; col < size; col++) {
-      const cellContainer = createCellContainer();
-      cellContainer.dataset.row = row;
-      cellContainer.dataset.column = col;
-      element.append(cellContainer);
+      // Create row border cells 1-10
+      if (col === 0) {
+        const borderCell = createBorderCell();
+        borderCell.innerHTML = `${row + 1}`;
+        element.append(borderCell);
+      }
+
+      // Create gameboard cells
+      const cell = createCell();
+      cell.dataset.row = row;
+      cell.dataset.column = col;
+      element.append(cell);
     }
   }
 
