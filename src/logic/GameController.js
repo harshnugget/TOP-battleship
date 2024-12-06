@@ -5,14 +5,14 @@ class GameController {
   #activePlayer;
   #gameInProgress;
 
-  constructor(player1, player2, singleplayer = true, logger = true) {
+  constructor(player1, player2, singlePlayer = true, logger = true) {
     this.#player1 = player1;
     this.#player2 = player2;
     this.#activePlayer;
     this.#winner;
     this.#gameInProgress;
 
-    this.singleplayer = singleplayer;
+    this.singlePlayer = singlePlayer;
     this.logger = logger;
 
     this.initialize();
@@ -43,7 +43,7 @@ class GameController {
     this.#activePlayer = this.#player1;
     this.#gameInProgress = false;
 
-    if (this.singleplayer) {
+    if (this.singlePlayer) {
       const player2Gameboard = this.#player2.gameboard;
       const player2Ships = player2Gameboard.ships;
 
@@ -130,7 +130,7 @@ class GameController {
 
       if (!this.gameHasWinner()) this.switchTurn();
 
-      if (this.singleplayer && this.#activePlayer !== this.#player1) {
+      if (this.singlePlayer && this.#activePlayer !== this.#player1) {
         this.guess();
       }
 
