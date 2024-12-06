@@ -198,6 +198,9 @@ class ShipUI {
           this.receiveHit(cellIndex);
         }
       });
+    } else {
+      this.resetShip();
+      this.#shipElement.remove();
     }
   }
 }
