@@ -35,6 +35,7 @@ class BattleshipUI {
 
     this.player1UI = this.createUI(this.players.player1);
     this.player2UI = this.createUI(this.players.player2);
+    this.buttons = this.createButtons();
 
     this.addGameboardEventListeners();
   }
@@ -63,22 +64,69 @@ class BattleshipUI {
     return { gameboardUI, shipsUI, gameboardContainer };
   }
 
+  createButtons() {
+    const buttons = { mainBtns: {}, player1Btns: {}, player2Btns: {} };
 
+    // Create main buttons
+    const start = BattleshipUI.createElement({
+      type: 'button',
+      text: 'Start',
+      id: 'start',
+      className: 'main-btn',
+      onClick: this.startGame.bind(this),
+    });
 
+    const reset = BattleshipUI.createElement({
+      type: 'button',
+      text: 'Reset',
+      id: 'reset',
+      className: 'main-btn',
+      onClick: this.resetGame.bind(this),
+    });
 
+    Object.assign(buttons.mainBtns, { start, reset });
 
+    // Create player buttons
+    [
+      { id: 1, playerBtns: buttons.player1Btns, playerUI: this.player1UI },
+      { id: 2, playerBtns: buttons.player2Btns, playerUI: this.player2UI },
+    ].forEach(({ id, playerBtns, playerUI }) => {
+      const randomize = BattleshipUI.createElement({
+        type: 'button',
         text: 'Randomize',
+        id: `p${id}-randomize`,
+        className: 'player-btn',
+        onClick: this.placeAllShips.bind(this, id),
       });
 
+      const toggle = BattleshipUI.createElement({
+        type: 'button',
+        text: 'Toggle',
+        id: `p${id}-toggle`,
+        className: 'player-btn',
         onClick: (() => {
+          const hideShipsFunc = this.hideShips.bind(this);
 
+          return function () {
+            const shipsUI = playerUI.shipsUI;
+            const allShipsHidden = [...shipsUI.values()].every((ship) => ship.hidden === true);
+
+            if (allShipsHidden) {
+              this.classList.remove('hide');
+              hideShipsFunc(id, false);
             } else {
+              this.classList.add('hide');
+              hideShipsFunc(id, true);
             }
           };
         })(),
       });
 
+      Object.assign(playerBtns, { randomize, toggle });
+    });
 
+    return buttons;
+  }
 
   getPlayerUI(playerId) {
     if (playerId === 1) {
@@ -118,6 +166,10 @@ class BattleshipUI {
       // Unhide player ships
       this.hideShips(playerId, false);
     });
+
+    // Remove "hide" class from toggle buttons
+    this.buttons.player1Btns.toggle.classList.remove('hide');
+    this.buttons.player2Btns.toggle.classList.remove('hide');
 
     this.render();
   }
@@ -169,13 +221,34 @@ class BattleshipUI {
   }
 
   load(container) {
+    const mainBtnsContainer = document.createElement('div');
+    const player1BtnsContainer = document.createElement('div');
+    const player2BtnsContainer = document.createElement('div');
 
+    mainBtnsContainer.className = 'main-btns-container';
+    player1BtnsContainer.className = 'p1-btns-container';
+    player2BtnsContainer.className = 'p2-btns-container';
 
     // Load gameboard UI
     [this.player1UI, this.player2UI].forEach((ui) => {
       container.append(ui.gameboardContainer);
     });
 
+    // Load buttons
+    Object.values(this.buttons.mainBtns).forEach((btn) => {
+      mainBtnsContainer.append(btn);
+    });
+
+    Object.values(this.buttons.player1Btns).forEach((btn) => {
+      player1BtnsContainer.append(btn);
+    });
+
+    Object.values(this.buttons.player2Btns).forEach((btn) => {
+      player2BtnsContainer.append(btn);
+    });
+
+    container.append(mainBtnsContainer, player1BtnsContainer, player2BtnsContainer);
+  }
 
   render() {
     [this.player1UI, this.player2UI].forEach((ui) => {
