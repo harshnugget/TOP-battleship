@@ -4,7 +4,8 @@ import Player from './logic/Player.js';
 import GameController from './logic/GameController.js';
 
 class Battleship {
-  #players;
+  #player1;
+  #player2;
   #controller;
 
   static shipConfig = [
@@ -16,43 +17,29 @@ class Battleship {
   ];
 
   static createPlayer = (name, id) => {
-    const gameboardShips = [];
-    const playerShips = {};
+    const playerShips = new Map();
 
     Battleship.shipConfig.forEach(({ type, length }) => {
       const ship = new Ship(length);
-
-      gameboardShips.push(ship);
-      playerShips[type] = { ship };
+      playerShips.set(type, ship);
     });
 
-    const gameboard = new Gameboard(10, gameboardShips);
+    const gameboard = new Gameboard(10, [...playerShips.values()]);
     const player = new Player(name, gameboard);
 
     return { id, ships: playerShips, gameboard, player };
   };
 
   constructor(player1Name, player2Name) {
-    this.#players = [
-      Battleship.createPlayer(player1Name || 'Player 1', 1),
-      Battleship.createPlayer(player2Name || 'Player 2', 2),
-    ];
+    this.#player1 = Battleship.createPlayer(player1Name || 'Player 1', 1);
+    this.#player2 = Battleship.createPlayer(player2Name || 'Player 2', 2);
 
-    if (!player2Name) {
-      // Singleplayer enabled
-      this.#controller = new GameController(this.#players[0].player, this.#players[1].player, true);
-    } else {
-      // Singleplayer disabled
-      this.#controller = new GameController(
-        this.#players[0].player,
-        this.#players[1].player,
-        false
-      );
-    }
+    // Create controller with single-player disabled by default
+    this.#controller = new GameController(this.#player1.player, this.#player2.player, false);
   }
 
   get players() {
-    return { player1: this.#players[0].player, player2: this.#players[1].player };
+    return { player1: this.#player1, player2: this.#player2 };
   }
 
   get activePlayer() {
@@ -67,8 +54,16 @@ class Battleship {
     return this.#controller.gameInProgress;
   }
 
-  get singleplayer() {
-    return this.#controller.singleplayer;
+  get singlePlayer() {
+    return this.#controller.singlePlayer;
+  }
+
+  set singlePlayer(value) {
+    if (value === true) {
+      this.#controller.singlePlayer = true;
+    } else {
+      this.#controller.singlePlayer = false;
+    }
   }
 
   startGame() {
@@ -83,22 +78,21 @@ class Battleship {
     this.#controller.attack([row, col]);
   }
 
-  getPlayerId(player) {
-    return this.#players.find((p) => p.player === player).id;
-  }
-
   getPlayerData(id) {
-    const player = this.#players[id - 1];
-    if (!player) throw new Error(`Invalid player ID: ${id}`);
-
-    return player;
+    if (id === 1) {
+      return this.#player1;
+    } else if (id === 2) {
+      return this.#player2;
+    } else {
+      throw new Error(`Invalid player ID: ${id}`);
+    }
   }
 
   placeShip(playerId, type, coordinates, orientation) {
     const { ships, gameboard } = this.getPlayerData(playerId);
 
     try {
-      gameboard.placeShip(ships[type].ship, coordinates, orientation);
+      gameboard.placeShip(ships.get(type), coordinates, orientation);
       return true;
     } catch (error) {
       console.error(error);
@@ -108,7 +102,7 @@ class Battleship {
 
   rotateShip(playerId, type) {
     const { gameboard, ships } = this.getPlayerData(playerId);
-    const ship = ships[type].ship;
+    const ship = ships.get(type);
 
     const coordinates = ship.coordinates;
     const newOrientation = ship.orientation === 'horizontal' ? 'vertical' : 'horizontal';
@@ -122,7 +116,7 @@ class Battleship {
 
   resetShip(playerId, type) {
     const { ships, gameboard } = this.getPlayerData(playerId);
-    const ship = ships[type].ship;
+    const ship = ships.get(type);
 
     gameboard.resetShip(ship);
   }
@@ -133,14 +127,14 @@ class Battleship {
     }
 
     const { ships, gameboard } = this.getPlayerData(playerId);
-    Object.values(ships).forEach(({ ship }) => {
+    ships.forEach((ship) => {
       gameboard.placeShipRandom(ship);
     });
   }
 
   resetAllShips(playerId) {
     const { ships, gameboard } = this.getPlayerData(playerId);
-    Object.values(ships).forEach(({ ship }) => {
+    ships.forEach((ship) => {
       gameboard.resetShip(ship);
     });
   }
