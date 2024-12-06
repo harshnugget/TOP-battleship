@@ -61,14 +61,11 @@ const createGameboardElement = (size) => {
 };
 
 class GameboardUI {
-  #parentContainer;
   #gameboardElement;
   #gameboard;
 
-  constructor(gameboard, parentContainer) {
-    this.#parentContainer = parentContainer;
+  constructor(gameboard) {
     this.#gameboardElement = createGameboardElement(gameboard.size);
-    this.#parentContainer.append(this.#gameboardElement);
     this.#gameboard = gameboard;
     this.hidden = false;
 
@@ -78,10 +75,6 @@ class GameboardUI {
       miss: 'red',
       empty: '',
     };
-  }
-
-  get parentContainer() {
-    return this.#parentContainer;
   }
 
   get gameboardElement() {
