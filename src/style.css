@@ -2,6 +2,36 @@
   box-sizing: border-box;
 }
 
+/* Main grid */
+main {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  grid-template-areas:
+    'p1-gameboard start-btn p2-gameboard'
+    'p1-gameboard reset-btn p2-gameboard'
+    'p1-btns . p2-btns';
+}
+
+.p1-gameboard-container {
+  grid-area: p1-gameboard;
+}
+
+.p2-gameboard-container {
+  grid-area: p2-gameboard;
+}
+
+.main-btns-container {
+  grid-area: start-btn;
+}
+
+.p1-btns-container {
+  grid-area: p1-btns;
+}
+
+.p2-btns-container {
+  grid-area: p2-btns;
+}
+
 /* Gameboard forms */
 .form-container {
   display: flex;
