@@ -23,7 +23,7 @@ const enableSinglePlayerFunc = () => {
   battleship.singlePlayer = true;
   battleshipUI.placeAllShips(2);
 
-  // Hide ships
+  // Hide player 2 ships
   if (!p2Btns.toggle.classList.contains('hide')) {
     p2Btns.toggle.dispatchEvent(new MouseEvent('click'));
   }
@@ -33,7 +33,7 @@ const disableSinglePlayerFunc = () => {
   battleship.singlePlayer = false;
   battleshipUI.resetAllShips(2);
 
-  // Unhide ships
+  // Unhide player 2 ships
   if (p2Btns.toggle.classList.contains('hide')) {
     p2Btns.toggle.dispatchEvent(new MouseEvent('click'));
   }
@@ -49,6 +49,7 @@ const createForms = new GameboardForms(
   disableSinglePlayerFunc
 );
 
+// Append player forms to their corresponding gameboard container
 createForms.loadP1Form(p1GameboardContainer);
 createForms.loadP2Form(p2GameboardContainer);
 
@@ -57,4 +58,21 @@ mainBtns.reset.addEventListener('click', () => {
   createForms.disableSinglePlayer();
   createForms.loadP1Form(p1GameboardContainer);
   createForms.loadP2Form(p2GameboardContainer);
+});
+
+// Start button alert
+mainBtns.start.addEventListener('click', (e) => {
+  if (
+    !(
+      battleship.players.player1.player.allShipsPlaced() &&
+      battleship.players.player2.player.allShipsPlaced()
+    )
+  ) {
+    alert('All ships must be placed before the game can begin.');
+  }
+
+  // Disable the start button if game has started
+  if (battleship.gameInProgress === true) {
+    e.target.disabled = true;
+  }
 });
