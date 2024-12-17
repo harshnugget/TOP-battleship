@@ -149,7 +149,7 @@ class BattleshipUI {
   }
 
   startGame() {
-    this.#battleship.startGame();
+    return this.#battleship.startGame();
   }
 
   resetGame() {
@@ -176,11 +176,6 @@ class BattleshipUI {
 
   attack(row, col) {
     this.#battleship.attack(row, col);
-    this.render();
-  }
-
-  guess() {
-    this.#battleship.guess();
     this.render();
   }
 

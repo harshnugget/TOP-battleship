@@ -67,15 +67,15 @@ class Battleship {
   }
 
   startGame() {
-    this.#controller.startGame();
+    return this.#controller.startGame();
   }
 
   resetGame() {
-    this.#controller.resetGame();
+    return this.#controller.resetGame();
   }
 
   attack(row, col) {
-    this.#controller.attack([row, col]);
+    return this.#controller.attack([row, col]);
   }
 
   getPlayerData(id) {
