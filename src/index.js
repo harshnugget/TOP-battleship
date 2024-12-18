@@ -60,6 +60,8 @@ mainBtns.reset.addEventListener('click', () => {
   createForms.loadP2Form(p2GameboardContainer);
 });
 
+// ######################################################################################
+
 // Start button alert
 mainBtns.start.addEventListener('click', (e) => {
   if (
@@ -71,8 +73,10 @@ mainBtns.start.addEventListener('click', (e) => {
     alert('All ships must be placed before the game can begin.');
   }
 
-  // Disable the start button if game has started
+  // Disable the start and randomize buttons if game has started
   if (battleship.gameInProgress === true) {
     e.target.disabled = true;
+    battleshipUI.buttons.player1Btns.randomize.disabled = true;
+    battleshipUI.buttons.player2Btns.randomize.disabled = true;
   }
 });
