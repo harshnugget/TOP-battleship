@@ -17,24 +17,41 @@ class GameboardForms {
   }
 
   createForm(id) {
+    const validateNameInput = (e) => {
+      if (!e.target.checkValidity()) {
+        e.target.title = '';
+
+        if (e.target.validity.patternMismatch) {
+          e.target.title = 'Name must contain at least one alphanumeric character.';
+        }
+
+        e.target.reportValidity();
+      } else {
+        e.target.setCustomValidity('');
+      }
+    };
+
     // Disable buttons
     [...this.mainBtns].forEach((btn) => (btn.disabled = true));
     [...this.p1Btns].forEach((btn) => (btn.disabled = true));
     [...this.p2Btns].forEach((btn) => (btn.disabled = true));
 
     const form = document.createElement('form');
-    form.id = `${id}-form`;
+    form.setAttribute('id', `${id}-form`);
 
     const formContainer = document.createElement('div');
     formContainer.classList.add('form-container');
     formContainer.style.position = 'absolute';
 
     const nameInput = document.createElement('input');
-    nameInput.id = `${id}-name-input`;
-    nameInput.placeholder = `Player Name`;
+    nameInput.setAttribute('id', `${id}-name-input`);
+    nameInput.setAttribute('placeholder', 'Player Name');
+    nameInput.setAttribute('pattern', '.*[a-zA-Z0-9].*');
+    nameInput.setAttribute('maxlength', '16');
+    nameInput.addEventListener('input', validateNameInput);
 
     const formSubmit = document.createElement('button');
-    formSubmit.id = `${id}-form-submit`;
+    formSubmit.setAttribute('id', `${id}-form-submit`);
     formSubmit.textContent = 'Submit';
 
     form.append(nameInput, formSubmit);
@@ -51,9 +68,14 @@ class GameboardForms {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      if (!nameInput.value.trim()) {
-        alert('Player name is required.');
-        return;
+      if (!nameInput.hasAttribute('required')) {
+        nameInput.setAttribute('required', '');
+      }
+
+      // Validate name input
+      if (!nameInput.checkValidity()) {
+        nameInput.reportValidity();
+        return false;
       }
 
       // Enable player buttons
@@ -84,8 +106,8 @@ class GameboardForms {
     checkboxLabel.htmlFor = 'single-player-checkbox';
 
     const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.id = 'single-player-checkbox';
+    checkbox.setAttribute('type', 'checkbox');
+    checkbox.setAttribute('id', 'single-player-checkbox');
 
     checkboxLabel.prepend(checkbox);
     form.prepend(checkboxLabel);
@@ -93,7 +115,6 @@ class GameboardForms {
     // Add event listener to disable/enable nameInput based on checkbox state
     checkbox.addEventListener('change', () => {
       if (checkbox.checked) {
-        nameInput.value = ''; // Clear input value when disabling
         nameInput.setAttribute('disabled', '');
       } else {
         nameInput.removeAttribute('disabled');
@@ -103,9 +124,14 @@ class GameboardForms {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      if (!checkbox.checked && !nameInput.value.trim()) {
-        alert('Player name is required.');
-        return;
+      if (!checkbox.checked) {
+        nameInput.setAttribute('required', '');
+
+        // Validate name input
+        if (!nameInput.checkValidity()) {
+          nameInput.reportValidity();
+          return false;
+        }
       }
 
       // Enable player buttons

@@ -52,3 +52,9 @@ main {
   display: flex;
   flex-direction: column;
 }
+
+#p1-name-input:invalid,
+#p2-name-input:invalid {
+  border-color: red;
+  outline-color: red;
+}
