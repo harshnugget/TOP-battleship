@@ -99,28 +99,34 @@ class BattleshipUI {
         onClick: this.placeAllShips.bind(this, id),
       });
 
-      const toggle = BattleshipUI.createElement({
-        type: 'button',
-        text: 'Toggle',
-        id: `p${id}-toggle`,
-        className: 'player-btn',
-        onClick: (() => {
-          const hideShipsFunc = this.hideShips.bind(this);
+      const toggle = (() => {
+        const hideShipsFunc = this.hideShips.bind(this);
+        const shipsUI = playerUI.shipsUI;
 
-          return function () {
-            const shipsUI = playerUI.shipsUI;
-            const allShipsHidden = [...shipsUI.values()].every((ship) => ship.hidden === true);
+        const allShipsHidden = () => {
+          return [...shipsUI.values()].every((ship) => ship.hidden === true);
+        };
 
-            if (allShipsHidden) {
-              this.classList.remove('hide');
-              hideShipsFunc(id, false);
-            } else {
-              this.classList.add('hide');
-              hideShipsFunc(id, true);
-            }
-          };
-        })(),
-      });
+        return BattleshipUI.createElement({
+          type: 'button',
+          text: 'Toggle',
+          id: `p${id}-toggle`,
+          className: `player-btn ${allShipsHidden() ? 'hide' : 'show'}`,
+          onClick: (() => {
+            return function () {
+              if (allShipsHidden()) {
+                this.classList.remove('hide');
+                this.classList.add('show');
+                hideShipsFunc(id, false);
+              } else {
+                this.classList.remove('show');
+                this.classList.add('hide');
+                hideShipsFunc(id, true);
+              }
+            };
+          })(),
+        });
+      })();
 
       Object.assign(playerBtns, { randomize, toggle });
     });
@@ -155,6 +161,15 @@ class BattleshipUI {
   resetGame() {
     this.#battleship.resetGame();
 
+    // Reset toggle buttons
+    if (this.buttons.player1Btns.toggle.classList.contains('hide')) {
+      this.buttons.player1Btns.toggle.click();
+    }
+
+    if (this.buttons.player2Btns.toggle.classList.contains('hide')) {
+      this.buttons.player2Btns.toggle.click();
+    }
+
     [1, 2].forEach((playerId) => {
       const { shipsUI } = this.getPlayerUI(playerId);
 
@@ -166,10 +181,6 @@ class BattleshipUI {
       // Unhide player ships
       this.hideShips(playerId, false);
     });
-
-    // Remove "hide" class from toggle buttons
-    this.buttons.player1Btns.toggle.classList.remove('hide');
-    this.buttons.player2Btns.toggle.classList.remove('hide');
 
     this.render();
   }
