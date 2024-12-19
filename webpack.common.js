@@ -1,33 +1,37 @@
-import { resolve } from "path";
-import HtmlWebpackPlugin from "html-webpack-plugin";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { resolve } from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const config = {
-  entry: "./src/index.js",
+  entry: './src/index.js',
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/template.html",
+      template: './src/template.html',
     }),
   ],
   module: {
     rules: [
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: "asset/resource",
+        test: /\.(png|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      },
+      {
+        test: /\.(svg)$/i,
+        type: 'asset/source',
       },
     ],
   },
   output: {
-    path: resolve(__dirname, "dist"),
-    filename: "bundle.js",
+    path: resolve(__dirname, 'dist'),
+    filename: 'bundle.js',
     clean: true,
   },
 };

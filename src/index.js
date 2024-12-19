@@ -3,6 +3,9 @@ import Battleship from './Battleship.js';
 import BattleshipUI from './BattleshipUI.js';
 import GameboardForms from './ui/GameboardForms.js';
 import EndGameDialogs from './ui/EndGameDialogs.js';
+import randomizeIcon from './img/randomize.svg';
+import toggleShowIcon from './img/toggle_show.svg';
+import toggleHideIcon from './img/toggle_hide.svg';
 
 const battleship = new Battleship('Player 1');
 const battleshipUI = new BattleshipUI(battleship);
@@ -107,9 +110,16 @@ function attackListener() {
       return; // Return if no winner
     }
 
-    // Force show ships if winner
-    battleshipUI.hideShips(1, false);
-    battleshipUI.hideShips(2, false);
+    // Show ships if winner
+    if (p1Btns.toggle.classList.contains('hide')) {
+      p1Btns.toggle.disabled = false;
+      p1Btns.toggle.click();
+    }
+
+    if (p2Btns.toggle.classList.contains('hide')) {
+      p2Btns.toggle.disabled = false;
+      p2Btns.toggle.click();
+    }
 
     // Disable toggle buttons if winner
     p1Btns.toggle.disabled = true;
@@ -123,4 +133,22 @@ attackListener();
 // Reset button listener for resetting dialogs
 mainBtns.reset.addEventListener('click', () => {
   endGameDialogs.hide();
+});
+
+// ######################################################################################
+
+[p1Btns, p2Btns].forEach((btns) => {
+  const toggleIcon = () => {
+    if (btns.toggle.classList.contains('show')) {
+      btns.toggle.innerHTML = toggleShowIcon;
+    } else {
+      btns.toggle.innerHTML = toggleHideIcon;
+    }
+  };
+
+  btns.randomize.innerHTML = randomizeIcon;
+  btns.randomize.innerHTML = randomizeIcon;
+
+  toggleIcon();
+  btns.toggle.addEventListener('click', toggleIcon);
 });
