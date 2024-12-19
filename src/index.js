@@ -2,6 +2,7 @@ import './style.css';
 import Battleship from './Battleship.js';
 import BattleshipUI from './BattleshipUI.js';
 import GameboardForms from './ui/GameboardForms.js';
+import EndGameDialogs from './ui/EndGameDialogs.js';
 
 const battleship = new Battleship('Player 1');
 const battleshipUI = new BattleshipUI(battleship);
@@ -79,4 +80,47 @@ mainBtns.start.addEventListener('click', (e) => {
     battleshipUI.buttons.player1Btns.randomize.disabled = true;
     battleshipUI.buttons.player2Btns.randomize.disabled = true;
   }
+});
+
+// ######################################################################################
+
+const endGameDialogs = new EndGameDialogs(p1GameboardContainer, p2GameboardContainer);
+
+function attackListener() {
+  // Create a new attack function to mimic battleship.attack
+  const originalAttackFunc = battleship.attack;
+
+  const player1 = battleship.getPlayerData(1);
+  const player2 = battleship.getPlayerData(2);
+
+  battleship.attack = function (row, col) {
+    // Call the attack function mimic in the context of battleship
+    originalAttackFunc.call(this, row, col);
+
+    const winner = battleship.winner;
+
+    if (winner === player1.player) {
+      endGameDialogs.show(1);
+    } else if (winner === player2.player) {
+      endGameDialogs.show(2);
+    } else {
+      return; // Return if no winner
+    }
+
+    // Force show ships if winner
+    battleshipUI.hideShips(1, false);
+    battleshipUI.hideShips(2, false);
+
+    // Disable toggle buttons if winner
+    p1Btns.toggle.disabled = true;
+    p2Btns.toggle.disabled = true;
+  };
+}
+
+// Activate listener
+attackListener();
+
+// Reset button listener for resetting dialogs
+mainBtns.reset.addEventListener('click', () => {
+  endGameDialogs.hide();
 });
