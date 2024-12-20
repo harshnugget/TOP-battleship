@@ -73,6 +73,7 @@ class BattleshipUI {
       text: 'Start',
       id: 'start',
       className: 'main-btn',
+      attributes: { title: 'Start Game' },
       onClick: this.startGame.bind(this),
     });
 
@@ -81,6 +82,7 @@ class BattleshipUI {
       text: 'Reset',
       id: 'reset',
       className: 'main-btn',
+      attributes: { title: 'Reset Game' },
       onClick: this.resetGame.bind(this),
     });
 
@@ -96,6 +98,7 @@ class BattleshipUI {
         text: 'Randomize',
         id: `p${id}-randomize`,
         className: 'player-btn',
+        attributes: { title: 'Randomize' },
         onClick: this.placeAllShips.bind(this, id),
       });
 
@@ -112,6 +115,7 @@ class BattleshipUI {
           text: 'Toggle',
           id: `p${id}-toggle`,
           className: `player-btn ${allShipsHidden() ? 'hide' : 'show'}`,
+          attributes: { title: 'Show/Hide' },
           onClick: (() => {
             return function () {
               if (allShipsHidden()) {
