@@ -7,14 +7,13 @@ import randomizeIcon from './img/randomize.svg';
 import toggleShowIcon from './img/toggle_show.svg';
 import toggleHideIcon from './img/toggle_hide.svg';
 
-const battleship = new Battleship('Player 1');
+const mainContainer = document.querySelector('main');
+const battleship = new Battleship('Player 1', 'Player 2');
 const battleshipUI = new BattleshipUI(battleship);
 window.game = battleship;
 window.gameUI = battleshipUI;
 
-battleshipUI.load(document.querySelector('main'));
-
-// ######################################################################################
+battleshipUI.load(mainContainer);
 
 const mainBtns = battleshipUI.buttons.mainBtns;
 const p1Btns = battleshipUI.buttons.player1Btns;
@@ -22,6 +21,35 @@ const p2Btns = battleshipUI.buttons.player2Btns;
 
 const p1GameboardContainer = document.querySelector('.p1-gameboard-container');
 const p2GameboardContainer = document.querySelector('.p2-gameboard-container');
+
+// ######################################################################################
+
+// PLAYER HEADERS
+
+const createPlayerHeader = (playerId) => {
+  const className = `p${playerId}-header-container`;
+  const gameboardHeaderContainer = document.createElement('div');
+  const playerHeader = document.createElement('h3');
+  const nameHeader = document.createElement('h3');
+
+  gameboardHeaderContainer.classList.add(className);
+  playerHeader.innerText = `Player ${playerId}`;
+  playerHeader.classList.add('player-header');
+  nameHeader.classList.add('name-header');
+
+  gameboardHeaderContainer.append(playerHeader);
+  gameboardHeaderContainer.append(nameHeader);
+  return gameboardHeaderContainer;
+};
+
+const p1Header = createPlayerHeader(1);
+const p2Header = createPlayerHeader(2);
+
+mainContainer.append(p1Header, p2Header);
+
+// ######################################################################################
+
+// FORMS //
 
 const enableSinglePlayerFunc = () => {
   battleship.singlePlayer = true;
@@ -43,30 +71,36 @@ const disableSinglePlayerFunc = () => {
   }
 };
 
-const createForms = new GameboardForms(
+const gameboardForms = new GameboardForms(
   {
     mainBtns: [mainBtns.start, mainBtns.reset],
     p1Btns: [p1Btns.randomize, p1Btns.toggle],
     p2Btns: [p2Btns.randomize, p2Btns.toggle],
   },
   enableSinglePlayerFunc,
-  disableSinglePlayerFunc
+  disableSinglePlayerFunc,
+  (args) => {
+    const headerContainer = args.playerId === 1 ? p1Header : p2Header;
+    headerContainer.querySelector('.name-header').innerText = args.playerName;
+  }
 );
 
 // Append player forms to their corresponding gameboard container
-createForms.loadP1Form(p1GameboardContainer);
-createForms.loadP2Form(p2GameboardContainer);
+gameboardForms.loadP1Form(p1GameboardContainer);
+gameboardForms.loadP2Form(p2GameboardContainer);
 
 // Reset button listener for resetting forms and game state
 mainBtns.reset.addEventListener('click', () => {
-  createForms.disableSinglePlayer();
-  createForms.loadP1Form(p1GameboardContainer);
-  createForms.loadP2Form(p2GameboardContainer);
+  gameboardForms.disableSinglePlayer();
+  gameboardForms.loadP1Form(p1GameboardContainer);
+  gameboardForms.loadP2Form(p2GameboardContainer);
 });
 
 // ######################################################################################
 
-// Start button alert
+// BUTTON EVENT LISTENERS //
+
+// Start button
 mainBtns.start.addEventListener('click', (e) => {
   if (
     !(
@@ -85,7 +119,26 @@ mainBtns.start.addEventListener('click', (e) => {
   }
 });
 
+// Toggle button
+[p1Btns, p2Btns].forEach((btns) => {
+  const toggleIcon = () => {
+    if (btns.toggle.classList.contains('show')) {
+      btns.toggle.innerHTML = toggleShowIcon;
+    } else {
+      btns.toggle.innerHTML = toggleHideIcon;
+    }
+  };
+
+  btns.randomize.innerHTML = randomizeIcon;
+  btns.randomize.innerHTML = randomizeIcon;
+
+  toggleIcon();
+  btns.toggle.addEventListener('click', toggleIcon);
+});
+
 // ######################################################################################
+
+// END GAME DIALOGS //
 
 const endGameDialogs = new EndGameDialogs(p1GameboardContainer, p2GameboardContainer);
 
@@ -136,19 +189,3 @@ mainBtns.reset.addEventListener('click', () => {
 });
 
 // ######################################################################################
-
-[p1Btns, p2Btns].forEach((btns) => {
-  const toggleIcon = () => {
-    if (btns.toggle.classList.contains('show')) {
-      btns.toggle.innerHTML = toggleShowIcon;
-    } else {
-      btns.toggle.innerHTML = toggleHideIcon;
-    }
-  };
-
-  btns.randomize.innerHTML = randomizeIcon;
-  btns.randomize.innerHTML = randomizeIcon;
-
-  toggleIcon();
-  btns.toggle.addEventListener('click', toggleIcon);
-});

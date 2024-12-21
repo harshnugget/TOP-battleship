@@ -7,9 +7,22 @@ main {
   display: grid;
   grid-template-columns: repeat(3, max-content);
   grid-template-areas:
+    'p1-header . p2-header'
     'p1-gameboard start-btn p2-gameboard'
     'p1-gameboard reset-btn p2-gameboard'
     'p1-btns . p2-btns';
+}
+
+.p1-header-container {
+  grid-area: p1-header;
+  display: flex;
+  justify-content: space-between;
+}
+
+.p2-header-container {
+  grid-area: p2-header;
+  display: flex;
+  justify-content: space-between;
 }
 
 .p1-gameboard-container {
