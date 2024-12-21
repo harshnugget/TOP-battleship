@@ -2,13 +2,15 @@ class GameboardForms {
   constructor(
     { mainBtns = [], p1Btns = [], p2Btns = [] },
     enableSinglePlayerFunc,
-    disableSinglePlayerFunc
+    disableSinglePlayerFunc,
+    onSubmitFunc
   ) {
     this.mainBtns = mainBtns;
     this.p1Btns = p1Btns;
     this.p2Btns = p2Btns;
     this.enableSinglePlayer = enableSinglePlayerFunc;
     this.disableSinglePlayer = disableSinglePlayerFunc;
+    this.onSubmit = onSubmitFunc;
 
     this.p1Form;
     this.p2Form;
@@ -51,7 +53,9 @@ class GameboardForms {
     nameInput.addEventListener('input', validateNameInput);
 
     const formSubmit = document.createElement('button');
+    formSubmit.setAttribute('type', `submit`);
     formSubmit.setAttribute('id', `${id}-form-submit`);
+    formSubmit.classList.add('form-submit');
     formSubmit.textContent = 'Submit';
 
     form.append(nameInput, formSubmit);
@@ -76,6 +80,11 @@ class GameboardForms {
       if (!nameInput.checkValidity()) {
         nameInput.reportValidity();
         return false;
+      }
+
+      // Call onSubmit with player id and name
+      if (this.onSubmit) {
+        this.onSubmit({ playerId: 1, playerName: nameInput.value });
       }
 
       // Enable player buttons
@@ -132,11 +141,13 @@ class GameboardForms {
           nameInput.reportValidity();
           return false;
         }
-      }
 
-      // Enable player buttons
-      if (!checkbox.checked) {
         [...this.p2Btns].forEach((btn) => (btn.disabled = false));
+
+        // Call onSubmit with player id and name
+        if (this.onSubmit) {
+          this.onSubmit({ playerId: 2, playerName: nameInput.value });
+        }
       }
 
       formContainer.remove();
