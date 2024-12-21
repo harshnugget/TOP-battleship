@@ -33,10 +33,7 @@ class GameboardForms {
       }
     };
 
-    // Disable buttons
-    [...this.mainBtns].forEach((btn) => (btn.disabled = true));
-    [...this.p1Btns].forEach((btn) => (btn.disabled = true));
-    [...this.p2Btns].forEach((btn) => (btn.disabled = true));
+    [...this.mainBtns, ...this.p1Btns, ...this.p2Btns].forEach((btn) => (btn.disabled = true));
 
     const form = document.createElement('form');
     form.setAttribute('id', `${id}-form`);
@@ -102,7 +99,7 @@ class GameboardForms {
 
     container.style.position = 'relative';
     container.append(formContainer);
-    this.p1Form = form;
+    this.p1Form = formContainer;
   }
 
   loadP2Form(container) {
@@ -143,11 +140,11 @@ class GameboardForms {
         }
 
         [...this.p2Btns].forEach((btn) => (btn.disabled = false));
+      }
 
-        // Call onSubmit with player id and name
-        if (this.onSubmit) {
-          this.onSubmit({ playerId: 2, playerName: nameInput.value });
-        }
+      // Call onSubmit with player id and name
+      if (this.onSubmit) {
+        this.onSubmit({ playerId: 2, playerName: nameInput?.value || 'AI' });
       }
 
       formContainer.remove();
@@ -169,7 +166,7 @@ class GameboardForms {
 
     container.style.position = 'relative';
     container.append(formContainer);
-    this.p2Form = form;
+    this.p2Form = formContainer;
   }
 }
 
