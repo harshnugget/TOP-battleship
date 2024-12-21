@@ -1,28 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Autour+One&display=swap');
+
 * {
   box-sizing: border-box;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+/* General styles */
+body {
+  background-color: #f5f5f5;
+  color: #333;
+  display: grid;
+  grid-template-columns: 1fr max-content 1fr;
+  grid-template-areas:
+    '. header .'
+    '. main .';
+}
+
+header {
+  justify-self: start;
+  padding: 1rem;
+  grid-area: header;
+}
+
+header h1 {
+  padding: 0px;
+  margin: 0px;
+  grid-area: header;
 }
 
 /* Main grid */
 main {
+  grid-area: main;
+  padding: 1rem;
   display: grid;
   grid-template-columns: repeat(3, max-content);
   grid-template-areas:
     'p1-header . p2-header'
-    'p1-gameboard start-btn p2-gameboard'
-    'p1-gameboard reset-btn p2-gameboard'
+    'p1-gameboard main-btns p2-gameboard'
+    'p1-gameboard main-btns p2-gameboard'
     'p1-btns . p2-btns';
 }
 
 .p1-header-container {
   grid-area: p1-header;
-  display: flex;
-  justify-content: space-between;
 }
 
 .p2-header-container {
   grid-area: p2-header;
+}
+
+.p1-header-container,
+.p2-header-container {
   display: flex;
   justify-content: space-between;
+  padding: 0rem 0.5rem;
+}
+
+.p1-header-container h3,
+.p2-header-container h3 {
+  margin: 0px;
+  color: #555;
 }
 
 .p1-gameboard-container {
@@ -34,7 +71,10 @@ main {
 }
 
 .main-btns-container {
-  grid-area: start-btn;
+  grid-area: main-btns;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
 }
 
 .p1-btns-container {
@@ -59,11 +99,63 @@ main {
 }
 
 .form-container form {
-  padding: 10px;
+  width: 260px;
+  min-height: max-content;
+  padding: 0.2rem 1rem;
   background-color: white;
-  border: 1px solid black;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: grid;
+  grid-template-rows: 24px repeat(2, minmax(28px, max-content)) 24px;
+  user-select: none;
+}
+
+.form-container form label {
+  grid-row: 1;
+  gap: 0.3rem;
+  align-self: self-end;
+  color: #666;
   display: flex;
-  flex-direction: column;
+  justify-self: end;
+  margin-right: 0.6rem;
+}
+
+.form-container form input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.4rem;
+  background-color: #fafafa;
+  font-size: large;
+  grid-row: 2;
+  margin: 0.2rem 0rem;
+}
+
+.form-container form input:disabled {
+  background-color: #e9e9e9;
+}
+
+.form-container form input:disabled::placeholder {
+  color: #d3d3d3;
+}
+
+.form-container form button {
+  grid-row: 3;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  background-color: #d9d9d9;
+  color: #333;
+  cursor: pointer;
+  font-size: large;
+  min-height: max-content;
+  margin: 0.2rem 0rem;
+  color: #555;
+  font-weight: bold;
+}
+
+.form-container form button:hover {
+  background-color: #c9c9c9;
 }
 
 #p1-name-input:invalid,
@@ -72,16 +164,121 @@ main {
   outline-color: red;
 }
 
+/* Gameboard */
+.p1-gameboard-container,
+.p2-gameboard-container {
+  margin: 0.2rem;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(185, 185, 185, 0.418);
+}
+
+.gameboard {
+  border: none !important;
+}
+
+.gameboard > .border-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-color: black !important;
+  background-color: rgb(233, 233, 233);
+  font-weight: bold;
+}
+
+.gameboard > .cell {
+  border-color: grey !important;
+  background-color: white;
+}
+
+.gameboard > .cell.hit {
+  background-color: transparent !important;
+  position: relative;
+}
+
+.gameboard > .cell.hit::after {
+  content: 'X';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Autour One', sans-serif;
+  font-size: 26px;
+  color: black;
+}
+
+/* Ships */
+.ship > .cell:not(.hide),
+.ship.cell:not(.hide) {
+  border-color: grey !important;
+  background-color: rgb(92, 92, 92) !important;
+}
+
+.ship > .cell.hit,
+.ship.cell.hit {
+  background-color: rgb(43, 43, 43) !important;
+}
+
 /* Buttons */
+.player-btn {
+  background-color: #e6e6e6;
+  margin: 0.2rem;
+  border: 2px solid #cccccc;
+  border-radius: 8px;
+}
+
+.player-btn:not(:disabled):hover {
+  background-color: #cccccc;
+  cursor: pointer;
+}
+
 .player-btn svg {
   display: flex;
   justify-content: center;
   align-items: center;
-  fill: black;
+  fill: #333;
   width: 40px;
   height: 40px;
 }
 
 .player-btn:disabled svg {
   fill: grey;
+}
+
+.main-btn {
+  background-color: #e6e6e6;
+  font-weight: bold;
+  font-size: large;
+  text-transform: uppercase;
+  margin: 0.2rem;
+  padding: 0.6rem 1.2rem;
+  border: 2px solid #cccccc;
+  border-radius: 8px;
+}
+
+.main-btn:not(:disabled):hover {
+  background-color: #cccccc;
+  cursor: pointer;
+}
+
+.main-btn:disabled {
+  background-color: #dcdcdc;
+  color: #999999;
+  border: 2px solid #b5b5b5;
+  opacity: 0.6;
+}
+
+/* Endgame dialog boxes */
+.dialog-content {
+  font-weight: bold;
+  font-size: 1.6rem;
+  color: #333;
+  background-color: #f9f9f9 !important;
+  border: 2px solid #7c7c7c !important;
+  border-radius: 12px;
+  padding: 20px !important;
+  margin: 20px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 150px;
+  text-align: center;
 }
