@@ -35,6 +35,7 @@ const createGameboardElement = (size) => {
       for (let head = 0; head < size + 1; head++) {
         const borderCell = createBorderCell();
         if (head > 0) {
+          borderCell.classList.add('letter');
           borderCell.innerHTML = `&#${65 + head - 1}`;
         }
         element.append(borderCell);
@@ -45,6 +46,7 @@ const createGameboardElement = (size) => {
       // Create row border cells 1-10
       if (col === 0) {
         const borderCell = createBorderCell();
+        borderCell.classList.add('number');
         borderCell.innerHTML = `${row + 1}`;
         element.append(borderCell);
       }
@@ -120,6 +122,11 @@ class GameboardUI {
 
         if (col.ship) {
           cell.classList.add('ship');
+          if (this.hidden === true) {
+            cell.classList.add('hide');
+          } else {
+            cell.classList.remove('hide');
+          }
         } else {
           cell.classList.remove('ship');
         }

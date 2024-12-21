@@ -168,8 +168,10 @@ class ShipUI {
   hideShip(isHidden = true) {
     if (isHidden) {
       this.hidden = true;
+      this.#shipElement.querySelectorAll('.cell').forEach((cell) => cell.classList.add('hide'));
     } else {
       this.hidden = false;
+      this.#shipElement.querySelectorAll('.cell').forEach((cell) => cell.classList.remove('hide'));
     }
 
     this.render();
