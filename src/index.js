@@ -51,7 +51,7 @@ mainContainer.append(p1Header, p2Header);
 
 // FORMS //
 
-const enableSinglePlayerFunc = () => {
+const enableSinglePlayer = () => {
   battleship.singlePlayer = true;
   battleshipUI.placeAllShips(2);
 
@@ -61,7 +61,7 @@ const enableSinglePlayerFunc = () => {
   }
 };
 
-const disableSinglePlayerFunc = () => {
+const disableSinglePlayer = () => {
   battleship.singlePlayer = false;
   battleshipUI.resetAllShips(2);
 
@@ -77,8 +77,8 @@ const gameboardForms = new GameboardForms(
     p1Btns: [p1Btns.randomize, p1Btns.toggle],
     p2Btns: [p2Btns.randomize, p2Btns.toggle],
   },
-  enableSinglePlayerFunc,
-  disableSinglePlayerFunc,
+  enableSinglePlayer,
+  disableSinglePlayer,
   (args) => {
     const headerContainer = args.playerId === 1 ? p1Header : p2Header;
     headerContainer.querySelector('.name-header').innerText = args.playerName;
@@ -89,11 +89,14 @@ const gameboardForms = new GameboardForms(
 gameboardForms.loadP1Form(p1GameboardContainer);
 gameboardForms.loadP2Form(p2GameboardContainer);
 
-// Reset button listener for resetting forms and game state
+// Reset button listener for resetting forms, game state and player names
 mainBtns.reset.addEventListener('click', () => {
-  gameboardForms.disableSinglePlayer();
+  disableSinglePlayer();
+  gameboardForms.formsSubmitted = 0;
   gameboardForms.loadP1Form(p1GameboardContainer);
   gameboardForms.loadP2Form(p2GameboardContainer);
+  p1Header.querySelector('.name-header').innerText = '';
+  p2Header.querySelector('.name-header').innerText = '';
 });
 
 // ######################################################################################
