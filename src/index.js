@@ -192,3 +192,49 @@ mainBtns.reset.addEventListener('click', () => {
 });
 
 // ######################################################################################
+
+// SHIP HOVERING //
+
+const toggleHover = (enabled = false) => {
+  battleshipUI.player1UI.shipsUI.forEach(({ shipElement }, type) => {
+    if (enabled === false) {
+      shipElement.classList.remove('hover-enabled');
+      shipElement.removeAttribute('title');
+    } else {
+      shipElement.classList.add('hover-enabled');
+      shipElement.setAttribute('title', type);
+    }
+  });
+
+  battleshipUI.player2UI.shipsUI.forEach(({ shipElement }, type) => {
+    if (enabled === false) {
+      shipElement.classList.remove('hover-enabled');
+      shipElement.removeAttribute('title');
+    } else {
+      shipElement.setAttribute('title', type);
+      shipElement.classList.add('hover-enabled');
+    }
+  });
+};
+
+toggleHover(true);
+
+// Start game listener
+const startGameListener = () => {
+  const startGameOriginal = battleship.startGame;
+
+  battleship.startGame = function () {
+    startGameOriginal.call(this);
+
+    if (this.gameInProgress === true) {
+      toggleHover(false);
+    }
+  };
+};
+
+startGameListener();
+
+// Reset button listener for resetting hover
+mainBtns.reset.addEventListener('click', () => {
+  toggleHover(true);
+});

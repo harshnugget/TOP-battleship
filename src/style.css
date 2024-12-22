@@ -100,6 +100,7 @@ main {
 
 .form-container form {
   width: 260px;
+  min-width: max-content;
   min-height: max-content;
   padding: 0.2rem 1rem;
   background-color: white;
@@ -171,6 +172,7 @@ main {
   border-width: 5px;
   border-style: solid;
   border-color: rgba(185, 185, 185, 0.418);
+  user-select: none;
 }
 
 .gameboard {
@@ -205,18 +207,23 @@ main {
   font-family: 'Autour One', sans-serif;
   font-size: 26px;
   color: black;
+  z-index: 3;
 }
 
 /* Ships */
 .ship > .cell:not(.hide),
-.ship.cell:not(.hide) {
+.cell.ship:not(.hide) {
   border-color: grey !important;
   background-color: rgb(92, 92, 92) !important;
 }
 
 .ship > .cell.hit,
-.ship.cell.hit {
+.cell.ship.hit {
   background-color: rgb(43, 43, 43) !important;
+}
+
+.ship.hover-enabled:hover > .cell:not(.hide) {
+  background-color: rgb(112, 112, 112) !important;
 }
 
 /* Buttons */
