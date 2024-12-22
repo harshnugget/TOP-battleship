@@ -79,13 +79,13 @@ class GameboardForms {
         return false;
       }
 
+      // Enable player buttons
+      [...this.p1Btns].forEach((btn) => (btn.disabled = false));
+
       // Call onSubmit with player id and name
       if (this.onSubmit) {
         this.onSubmit({ playerId: 1, playerName: nameInput.value });
       }
-
-      // Enable player buttons
-      [...this.p1Btns].forEach((btn) => (btn.disabled = false));
 
       formContainer.remove();
 
@@ -140,6 +140,8 @@ class GameboardForms {
         }
 
         [...this.p2Btns].forEach((btn) => (btn.disabled = false));
+      } else {
+        nameInput.value = '';
       }
 
       // Call onSubmit with player id and name

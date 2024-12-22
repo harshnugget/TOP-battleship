@@ -30,12 +30,17 @@ class Battleship {
     return { id, ships: playerShips, gameboard, player };
   };
 
-  constructor(player1Name, player2Name) {
+  constructor(player1Name, player2Name, logger = false) {
     this.#player1 = Battleship.createPlayer(player1Name || 'Player 1', 1);
     this.#player2 = Battleship.createPlayer(player2Name || 'Player 2', 2);
 
     // Create controller with single-player disabled by default
-    this.#controller = new GameController(this.#player1.player, this.#player2.player, false);
+    this.#controller = new GameController(
+      this.#player1.player,
+      this.#player2.player,
+      false,
+      logger
+    );
   }
 
   get players() {

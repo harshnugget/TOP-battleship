@@ -8,12 +8,21 @@ import toggleShowIcon from './img/toggle_show.svg';
 import toggleHideIcon from './img/toggle_hide.svg';
 
 const mainContainer = document.querySelector('main');
-const battleship = new Battleship('Player 1', 'Player 2');
+
+const logging = false;
+const battleship = new Battleship('Player 1', 'Player 2', logging);
 const battleshipUI = new BattleshipUI(battleship);
-window.game = battleship;
-window.gameUI = battleshipUI;
+
+if (logging) {
+  window.game = battleship;
+  window.gameUI = battleshipUI;
+}
 
 battleshipUI.load(mainContainer);
+
+// ######################################################################################
+
+// SELECTORS //
 
 const mainBtns = battleshipUI.buttons.mainBtns;
 const p1Btns = battleshipUI.buttons.player1Btns;
@@ -63,7 +72,6 @@ const enableSinglePlayer = () => {
 
 const disableSinglePlayer = () => {
   battleship.singlePlayer = false;
-  battleshipUI.resetAllShips(2);
 
   // Unhide player 2 ships
   if (p2Btns.toggle.classList.contains('hide')) {
@@ -80,8 +88,13 @@ const gameboardForms = new GameboardForms(
   enableSinglePlayer,
   disableSinglePlayer,
   (args) => {
-    const headerContainer = args.playerId === 1 ? p1Header : p2Header;
-    headerContainer.querySelector('.name-header').innerText = args.playerName;
+    if (args.playerId === 1) {
+      p1Btns.randomize.click();
+      p1Header.querySelector('.name-header').innerText = args.playerName;
+    } else {
+      p2Btns.randomize.click();
+      p2Header.querySelector('.name-header').innerText = args.playerName;
+    }
   }
 );
 
@@ -196,7 +209,7 @@ mainBtns.reset.addEventListener('click', () => {
 // SHIP HOVERING //
 
 const toggleHover = (enabled = false) => {
-  battleshipUI.player1UI.shipsUI.forEach(({ shipElement }, type) => {
+  const toggle = (shipElement, type) => {
     if (enabled === false) {
       shipElement.classList.remove('hover-enabled');
       shipElement.removeAttribute('title');
@@ -204,16 +217,14 @@ const toggleHover = (enabled = false) => {
       shipElement.classList.add('hover-enabled');
       shipElement.setAttribute('title', type);
     }
+  };
+
+  battleshipUI.player1UI.shipsUI.forEach(({ shipElement }, type) => {
+    toggle(shipElement, type);
   });
 
   battleshipUI.player2UI.shipsUI.forEach(({ shipElement }, type) => {
-    if (enabled === false) {
-      shipElement.classList.remove('hover-enabled');
-      shipElement.removeAttribute('title');
-    } else {
-      shipElement.setAttribute('title', type);
-      shipElement.classList.add('hover-enabled');
-    }
+    toggle(shipElement, type);
   });
 };
 
