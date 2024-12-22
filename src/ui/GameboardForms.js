@@ -15,7 +15,18 @@ class GameboardForms {
     this.p1Form;
     this.p2Form;
 
+    this.p1FormParent;
+    this.p2FormParent;
+
     this.formsSubmitted = 0;
+  }
+
+  reload() {
+    this.formsSubmitted = 0;
+    this.p1Form.remove();
+    this.p2Form.remove();
+    this.loadP1Form(this.p1FormParent);
+    this.loadP2Form(this.p2FormParent);
   }
 
   createForm(id) {
@@ -100,6 +111,7 @@ class GameboardForms {
     container.style.position = 'relative';
     container.append(formContainer);
     this.p1Form = formContainer;
+    this.p1FormParent = container;
   }
 
   loadP2Form(container) {
@@ -169,6 +181,7 @@ class GameboardForms {
     container.style.position = 'relative';
     container.append(formContainer);
     this.p2Form = formContainer;
+    this.p2FormParent = container;
   }
 }
 

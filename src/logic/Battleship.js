@@ -41,6 +41,8 @@ class Battleship {
       false,
       logger
     );
+
+    this.logger = logger;
   }
 
   get players() {
@@ -48,7 +50,12 @@ class Battleship {
   }
 
   get activePlayer() {
-    return this.#controller.activePlayer;
+    const activePlayer = this.#controller.activePlayer;
+
+    if (activePlayer === this.#player1.player) return this.#player1;
+    if (activePlayer === this.#player2.player) return this.#player2;
+
+    return null;
   }
 
   get winner() {
@@ -100,7 +107,10 @@ class Battleship {
       gameboard.placeShip(ships.get(type), coordinates, orientation);
       return true;
     } catch (error) {
-      console.error(error);
+      if (this.logger) {
+        console.error(error);
+      }
+
       return false;
     }
   }
@@ -115,7 +125,9 @@ class Battleship {
     try {
       if (coordinates.length > 0) gameboard.placeShip(ship, coordinates[0], newOrientation);
     } catch (error) {
-      console.error(error);
+      if (this.logger) {
+        console.error(error);
+      }
     }
   }
 

@@ -215,6 +215,10 @@ class BattleshipUI {
   }
 
   placeAllShips(playerId) {
+    if (this.#battleship.singlePlayer) {
+      this.hideShips(2);
+    }
+
     this.#battleship.placeAllShips(playerId);
     this.render();
   }
@@ -319,7 +323,7 @@ class BattleshipUI {
             const clickedCell = getElement(event, 'cell', gameboardElement);
             if (
               clickedCell &&
-              player.player !== this.#battleship.activePlayer &&
+              player !== this.#battleship.activePlayer &&
               this.#battleship.gameInProgress
             ) {
               this.attack(clickedCell.dataset.row, clickedCell.dataset.column);
