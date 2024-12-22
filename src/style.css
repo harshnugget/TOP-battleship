@@ -221,6 +221,10 @@ main {
   background-color: white;
 }
 
+.gameboard .cell.hover-enabled:hover {
+  filter: brightness(0.8);
+}
+
 .gameboard > .cell.hit {
   background-color: transparent !important;
   position: relative;

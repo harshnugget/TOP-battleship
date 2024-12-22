@@ -249,3 +249,46 @@ startGameListener();
 mainBtns.reset.addEventListener('click', () => {
   toggleHover(true);
 });
+
+// ######################################################################################
+
+// CELL HOVERING //
+
+const cellHover = () => {
+  const p1Gameboard = p1GameboardContainer.querySelector('.gameboard');
+  const p2Gameboard = p2GameboardContainer.querySelector('.gameboard');
+
+  p1Gameboard.addEventListener('mouseover', (e) => {
+    const activePlayer = battleship.activePlayer;
+    const player2 = battleship.getPlayerData(2).player;
+
+    if (battleship.gameInProgress === true && activePlayer === player2) {
+      const hoveredCells = document.querySelectorAll('.cell.hover-enabled');
+      const cell = e.target.closest('.cell');
+
+      hoveredCells.forEach((cell) => cell.classList.remove('hover-enabled'));
+
+      if (cell) {
+        cell.classList.add('hover-enabled');
+      }
+    }
+  });
+
+  p2Gameboard.addEventListener('mouseover', (e) => {
+    const activePlayer = battleship.activePlayer;
+    const player1 = battleship.getPlayerData(1).player;
+
+    if (battleship.gameInProgress === true && activePlayer === player1) {
+      const hoveredCells = document.querySelectorAll('.cell.hover-enabled');
+      const cell = e.target.closest('.cell');
+
+      hoveredCells.forEach((cell) => cell.classList.remove('hover-enabled'));
+
+      if (cell) {
+        cell.classList.add('hover-enabled');
+      }
+    }
+  });
+};
+
+cellHover();
