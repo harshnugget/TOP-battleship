@@ -1,6 +1,6 @@
 import './style.css';
-import Battleship from './Battleship.js';
-import BattleshipUI from './BattleshipUI.js';
+import Battleship from './logic/Battleship.js';
+import BattleshipUI from './ui/BattleshipUI.js';
 import GameboardForms from './ui/GameboardForms.js';
 import EndGameDialogs from './ui/EndGameDialogs.js';
 import randomizeIcon from './img/randomize.svg';

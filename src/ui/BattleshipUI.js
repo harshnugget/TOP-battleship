@@ -1,5 +1,5 @@
-import GameboardUI from './ui/GameboardUI.js';
-import ShipUI from './ui/ShipUI.js';
+import GameboardUI from '../ui/GameboardUI.js';
+import ShipUI from '../ui/ShipUI.js';
 
 class BattleshipUI {
   #battleship;

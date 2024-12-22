@@ -1,7 +1,7 @@
-import Ship from './logic/Ship.js';
-import Gameboard from './logic/Gameboard.js';
-import Player from './logic/Player.js';
-import GameController from './logic/GameController.js';
+import Ship from '../logic/Ship.js';
+import Gameboard from '../logic/Gameboard.js';
+import Player from '../logic/Player.js';
+import GameController from '../logic/GameController.js';
 
 class Battleship {
   #player1;
