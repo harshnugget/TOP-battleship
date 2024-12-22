@@ -6,6 +6,8 @@ import EndGameDialogs from './ui/EndGameDialogs.js';
 import randomizeIcon from './img/randomize.svg';
 import toggleShowIcon from './img/toggle_show.svg';
 import toggleHideIcon from './img/toggle_hide.svg';
+import cellHover from './ui/cellHover.js';
+import shipHover from './ui/shipHover.js';
 import createPlayerHeaders from './ui/createPlayerHeader.js';
 
 // Enable logging to view game in console
@@ -196,4 +198,51 @@ attackHandler.taskList.push(() => {
 // Hide dialogs on game reset
 resetGameHandler.taskList.push(() => {
   endGameDialogs.hide();
+});
+
+// ######################################################################################
+
+// SHIP HOVERING //
+
+const shipHoverEffects = shipHover(battleshipUI.player1UI.shipsUI, battleshipUI.player1UI.shipsUI);
+shipHoverEffects.enable();
+
+startGameHandler.taskList.push(() => {
+  shipHoverEffects.disable();
+});
+
+// Reset ship hover effects on reset
+resetGameHandler.taskList.push(() => {
+  shipHoverEffects.enable();
+});
+
+// ######################################################################################
+
+// CELL HOVERING //
+
+const cellHoverEffects = cellHover(p1GameboardContainer, p2GameboardContainer, 'cell');
+
+const toggleHoverEffects = () => {
+  if (battleship.activePlayer.id === 1) {
+    cellHoverEffects.enable(2);
+    cellHoverEffects.disable(1);
+  }
+
+  if (battleship.activePlayer.id === 2) {
+    cellHoverEffects.enable(1);
+    cellHoverEffects.disable(2);
+  }
+};
+
+startGameHandler.taskList.push(() => {
+  toggleHoverEffects();
+});
+
+resetGameHandler.taskList.push(() => {
+  cellHoverEffects.disable(1);
+  cellHoverEffects.disable(2);
+});
+
+attackHandler.taskList.push(() => {
+  toggleHoverEffects();
 });
