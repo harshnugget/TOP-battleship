@@ -1,13 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Autour+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
-/* Colors */
 :root {
+  /* Colors */
   --lighter-gray: #f5f5f5;
   --light-gray: #cccccc;
   --medium-gray: #979797;
   --dark-gray: #525252;
   --darker-gray: #2e2e2e;
+
+  /* Border radius */
+  --border-radius-small: 4px;
+  --border-radius-medium: 8px;
+  --border-radius-large: 16px;
 }
 
 * {
@@ -55,7 +60,7 @@ header h1 {
   padding: 0px;
   margin: 0px;
   grid-area: header;
-  font-size: 4rem;
+  font-size: 3rem;
 }
 
 /* Main grid */
@@ -136,6 +141,7 @@ main {
   padding: 0.2rem 1rem;
   background-color: white;
   border: 2px solid var(--medium-gray);
+  border-radius: var(--border-radius-small);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   display: grid;
   grid-template-rows: 24px repeat(2, minmax(28px, max-content)) 24px;
@@ -154,7 +160,7 @@ main {
 
 .form-container form input {
   border: 1px solid var(--medium-gray);
-  border-radius: 4px;
+  border-radius: var(--border-radius-medium);
   padding: 0.4rem;
   font-size: large;
   grid-row: 2;
@@ -172,7 +178,7 @@ main {
 .form-container form button {
   grid-row: 3;
   border: none;
-  border-radius: 5px;
+  border-radius: var(--border-radius-medium);
   padding: 0.5rem 1rem;
   background-color: var(--medium-gray);
   color: var(--dark-gray);
@@ -271,7 +277,7 @@ main {
   background-color: var(--lighter-gray);
   filter: brightness(0.9);
   border: 2px solid var(--light-gray);
-  border-radius: 8px;
+  border-radius: var(--border-radius-medium);
   margin: 0.2rem;
 }
 
@@ -307,10 +313,12 @@ main {
   padding: 20px !important;
   margin: 20px !important;
   background-color: white !important;
+  border: 2px solid var(--medium-gray) !important;
+  border-radius: var(--border-radius-medium);
   font-weight: bold;
   font-size: 1.6rem;
   color: var(--darker-gray);
-  border: 2px solid var(--medium-gray);
+  border: 2px solid var(--medium-gray) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   width: 150px;
   text-align: center;
