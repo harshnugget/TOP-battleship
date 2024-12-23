@@ -7,7 +7,7 @@
   --light-gray: #cccccc;
   --medium-gray: #979797;
   --dark-gray: #525252;
-  --darker-gray: #2e2e2e;
+  --darker-gray: #353535;
 
   /* Border radius */
   --border-radius-small: 4px;
@@ -248,15 +248,24 @@ main {
   z-index: 3;
 }
 
-/* Ships */
+/* Ship cells */
 .ship > .cell:not(.hide),
 .cell.ship:not(.hide) {
   border-color: var(--medium-gray) !important;
   background-color: var(--dark-gray) !important;
 }
 
+/* Hit ships */
 .ship > .cell.hit,
 .cell.ship.hit {
+  background-color: var(--dark-gray) !important;
+}
+
+/* Sunk ships */
+.ship.sunk > .cell,
+.cell.ship.sunk,
+.cell.ship.sunk::after {
+  color: white;
   background-color: var(--darker-gray) !important;
 }
 

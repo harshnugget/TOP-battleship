@@ -180,12 +180,6 @@ class ShipUI {
     const orientation = this.#ship.orientation;
     const allHitCells = this.#gameboardUI.getHitCells();
 
-    if (this.hidden === true) {
-      return (this.shipElement.style.visibility = 'hidden');
-    } else {
-      this.shipElement.style.visibility = '';
-    }
-
     if (coordinates.length > 0) {
       this.placeShip(coordinates[0]);
       this.setOrientation(orientation);
@@ -196,6 +190,20 @@ class ShipUI {
 
         if ([...allHitCells].includes(cell)) {
           this.receiveHit(cellIndex);
+        }
+
+        if (this.ship.isSunk) {
+          this.shipElement.classList.add('sunk');
+          cell.classList.add('sunk');
+        } else {
+          this.shipElement.classList.remove('sunk');
+          cell.classList.remove('sunk');
+        }
+
+        if (this.hidden === true) {
+          this.shipElement.style.visibility = 'hidden';
+        } else {
+          this.shipElement.style.visibility = '';
         }
       });
     } else {
