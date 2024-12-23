@@ -69,7 +69,7 @@ class GameboardUI {
   constructor(gameboard) {
     this.#gameboardElement = createGameboardElement(gameboard.size);
     this.#gameboard = gameboard;
-    this.hidden = false;
+    this.hidden = false; // Hides all gameboard ships cells
 
     this.cellColours = {
       ship: 'blue',
@@ -106,6 +106,8 @@ class GameboardUI {
     } else {
       this.hidden = false;
     }
+
+    this.render();
   }
 
   render() {
