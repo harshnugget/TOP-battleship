@@ -110,8 +110,6 @@ class ShipUI {
   placeShipPlaceholder([row, col]) {
     const placeholderCells = [];
 
-    this.#shipElement.style.visibility = 'hidden';
-
     this.removeShipPlaceholder();
 
     for (let i = 0; i < this.ship.length; i++) {
@@ -178,15 +176,15 @@ class ShipUI {
   }
 
   render() {
+    const coordinates = this.#ship.coordinates;
+    const orientation = this.#ship.orientation;
+    const allHitCells = this.#gameboardUI.getHitCells();
+
     if (this.hidden === true) {
       return (this.shipElement.style.visibility = 'hidden');
     } else {
       this.shipElement.style.visibility = '';
     }
-
-    const coordinates = this.#ship.coordinates;
-    const orientation = this.#ship.orientation;
-    const allHitCells = this.#gameboardUI.getHitCells();
 
     if (coordinates.length > 0) {
       this.placeShip(coordinates[0]);
