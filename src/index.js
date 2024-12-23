@@ -204,7 +204,7 @@ resetGameHandler.taskList.push(() => {
 
 // SHIP HOVERING //
 
-const shipHoverEffects = shipHover(battleshipUI.player1UI.shipsUI, battleshipUI.player1UI.shipsUI);
+const shipHoverEffects = shipHover(battleshipUI.player1UI.shipsUI, battleshipUI.player2UI.shipsUI);
 shipHoverEffects.enable();
 
 startGameHandler.taskList.push(() => {
