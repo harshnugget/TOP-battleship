@@ -32,7 +32,7 @@ body {
   grid-template-areas:
     '. header .'
     '. main .'
-    'footer footer footer'; /* Footer row */
+    'footer footer footer';
 }
 
 footer {
@@ -197,6 +197,12 @@ main {
 #p2-name-input:invalid {
   border-color: red;
   outline-color: red;
+}
+
+#p1-name-input:hover:not(:disabled),
+#p2-name-input:hover:not(:disabled) {
+  border-color: var(--darker-gray);
+  background-color: var(--lighter-gray);
 }
 
 /* Gameboard */

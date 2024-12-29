@@ -70,22 +70,26 @@ const p1Btns = battleshipUI.buttons.player1Btns;
 const p2Btns = battleshipUI.buttons.player2Btns;
 
 const enableSinglePlayer = () => {
-  battleship.singlePlayer = true;
-  battleshipUI.placeAllShips(2);
-
   // Hide player 2 ships
   if (!p2Btns.toggle.classList.contains('hide')) {
+    p2Btns.toggle.disabled = false;
     p2Btns.toggle.click();
+    p2Btns.toggle.disabled = true;
   }
+
+  battleship.singlePlayer = true;
+  battleshipUI.placeAllShips(2);
 };
 
 const disableSinglePlayer = () => {
-  battleship.singlePlayer = false;
-
   // Unhide player 2 ships
   if (p2Btns.toggle.classList.contains('hide')) {
+    p2Btns.toggle.disabled = false;
     p2Btns.toggle.click();
+    p2Btns.toggle.disabled = true;
   }
+
+  battleship.singlePlayer = false;
 };
 
 // Icons for player buttons
