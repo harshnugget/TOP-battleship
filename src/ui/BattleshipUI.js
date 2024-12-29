@@ -182,24 +182,19 @@ class BattleshipUI {
   resetGame() {
     this.#battleship.resetGame();
 
-    // Reset toggle buttons
-    if (this.buttons.player1Btns.toggle.classList.contains('hide')) {
-      this.buttons.player1Btns.toggle.click();
-    }
-
-    if (this.buttons.player2Btns.toggle.classList.contains('hide')) {
-      this.buttons.player2Btns.toggle.click();
-    }
-
     [1, 2].forEach((playerId) => {
       const { shipsUI } = this.getPlayerUI(playerId);
 
       shipsUI.forEach((shipUI) => {
         shipUI.resetShip();
       });
+    });
 
-      // Unhide player ships
-      this.hideShips(playerId, false);
+    // Reset toggle buttons (unhide ships)
+    [this.buttons.player1Btns.toggle, this.buttons.player2Btns.toggle].forEach((btn) => {
+      if (btn.classList.contains('hide')) {
+        btn.click();
+      }
     });
 
     this.render();

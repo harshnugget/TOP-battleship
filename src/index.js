@@ -111,6 +111,16 @@ startGameHandler.taskList.push(() => {
   p2Btns.randomize.disabled = true;
 });
 
+// Unhide ships on game reset
+resetGameHandler.taskList.push(() => {
+  [p1Btns.toggle, p2Btns.toggle].forEach((btn) => {
+    if (btn.classList.contains('hide')) {
+      btn.disabled = false;
+      btn.click();
+    }
+  });
+});
+
 // ######################################################################################
 
 // PLAYER HEADERS
