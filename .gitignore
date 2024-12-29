@@ -1,5 +1,6 @@
 .vscode
 coverage
 node_modules
+dist
 eslint.config.js
 package-lock.json
