@@ -8,10 +8,8 @@ import toggleShowIcon from './img/toggle_show.svg';
 import toggleHideIcon from './img/toggle_hide.svg';
 import cellHover from './ui/cellHover.js';
 import shipHover from './ui/shipHover.js';
-import createPlayerHeaders from './ui/createPlayerHeader.js';
 
-// Enable logging to view game in console
-const logging = true;
+const logging = false; // Logs game flow to console if enabled
 const battleship = new Battleship('Player 1', 'Player 2', logging);
 const battleshipUI = new BattleshipUI(battleship);
 
@@ -116,8 +114,24 @@ startGameHandler.taskList.push(() => {
 // ######################################################################################
 
 // PLAYER HEADERS
+const createPlayerHeader = (playerId) => {
+  const className = `p${playerId}-header-container`;
+  const headerContainer = document.createElement('div');
+  const playerHeader = document.createElement('h3');
+  const nameHeader = document.createElement('h3');
 
-const { player1: p1Header, player2: p2Header } = createPlayerHeaders();
+  headerContainer.classList.add(className);
+  playerHeader.innerText = `Player ${playerId}`;
+  playerHeader.classList.add('player-header');
+  nameHeader.classList.add('name-header');
+
+  headerContainer.append(playerHeader, nameHeader);
+  return headerContainer;
+};
+
+const p1Header = createPlayerHeader(1);
+const p2Header = createPlayerHeader(2);
+
 mainContainer.append(p1Header, p2Header);
 
 resetGameHandler.taskList.push(() => {
@@ -185,18 +199,14 @@ attackHandler.taskList.push(() => {
   }
 
   // Show ships if winner
-  if (p1Btns.toggle.classList.contains('hide')) {
-    p1Btns.toggle.disabled = false;
-    p1Btns.toggle.click();
-  }
+  [p1Btns.toggle, p2Btns.toggle].forEach((toggleBtn) => {
+    if (toggleBtn.classList.contains('hide')) {
+      toggleBtn.disabled = false;
+      toggleBtn.click();
+    }
 
-  if (p2Btns.toggle.classList.contains('hide')) {
-    p2Btns.toggle.disabled = false;
-    p2Btns.toggle.click();
-  }
-
-  p1Btns.toggle.disabled = true;
-  p2Btns.toggle.disabled = true;
+    toggleBtn.disabled = true;
+  });
 });
 
 // Hide dialogs on game reset
