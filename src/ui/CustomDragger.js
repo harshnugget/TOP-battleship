@@ -47,18 +47,18 @@ class CustomDragger {
 
     const onMouseEnter = () => {
       if (!this.disabled) {
-        target.style.cursor = 'grab';
+        document.body.style.cursor = 'grab';
       }
     };
 
     const onMouseLeave = () => {
-      target.style.cursor = '';
+      document.body.style.cursor = '';
     };
 
     const onMouseDown = (e) => {
       if (this.disabled || e.button !== 0) return;
 
-      target.style.cursor = 'grabbing';
+      document.body.style.cursor = 'grabbing';
 
       // Start the drag event
       const onMouseMove = (e) => {
@@ -77,7 +77,7 @@ class CustomDragger {
           isDragging = false;
           callbacks.dragEnd?.({ clientX: e.clientX, clientY: e.clientY, target });
         }
-        target.style.cursor = 'grab';
+        document.body.style.cursor = 'grab';
         document.removeEventListener('mousemove', onMouseMove);
       };
 
