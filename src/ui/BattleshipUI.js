@@ -385,11 +385,7 @@ class BattleshipUI {
         // Click ship to rotate
         shipElement.addEventListener('click', clickedShip.bind(this, player.id, type));
 
-        // Make ship draggable
-        customDragger.makeDraggable(shipElement);
-
-        // Start drag
-        customDragger.listener('dragstart', shipElement, (event) => {
+        customDragger.dragStart(shipElement, (event) => {
           const clickedShipCell = getElementFromPoint(
             event.clientX,
             event.clientY,
@@ -400,6 +396,7 @@ class BattleshipUI {
           // Remove the ship from gameboard during drag operation
           const prevCoords = ship.coordinates;
           const prevOrientation = ship.orientation;
+
           this.resetShip(player.id, type);
           ship.coordinates = prevCoords;
           ship.orientation = prevOrientation;
@@ -409,15 +406,13 @@ class BattleshipUI {
           }
         });
 
-        // End drag
-        customDragger.listener('dragend', shipElement, () => {
+        customDragger.dragEnd(shipElement, () => {
           shipUI.removeShipPlaceholder();
 
           handleShipPlacement(type, ship, cellIndex);
         });
 
-        // Drag over
-        customDragger.listener('drag', shipElement, () => {
+        customDragger.drag(shipElement, () => {
           const coordinates = getPlacementCoordinates(ship.orientation, cellIndex);
 
           if (coordinates) {

@@ -1,128 +1,113 @@
 class CustomDragger {
   constructor() {
     this.draggableTargets = new Map();
-    this.draggedTarget = null;
-    this.dragImage = null;
-    this.offsetX = 0;
-    this.offsetY = 0;
     this.disabled = false;
-
-    document.addEventListener('mousemove', (e) => {
-      this.moveDragImage(e);
-    });
   }
 
+  // Create the drag image to follow the mouse cursor
   createDragImage(target, event) {
-    const dragImage = target.cloneNode(true);
-    dragImage.style.position = 'absolute';
-    dragImage.style.pointerEvents = 'none';
-    dragImage.style.zIndex = '1000';
-    dragImage.style.opacity = '0.8';
-    document.body.appendChild(dragImage);
-    this.dragImage = dragImage;
-
     const rect = target.getBoundingClientRect();
-    this.offsetX = event.clientX - rect.left;
-    this.offsetY = event.clientY - rect.top;
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+
+    const dragImage = target.cloneNode(true);
+    Object.assign(dragImage.style, {
+      position: 'absolute',
+      pointerEvents: 'none',
+      zIndex: '1000',
+      opacity: '0.8',
+      left: `${event.clientX - offsetX}px`,
+      top: `${event.clientY - offsetY}px`,
+    });
+
+    document.body.append(dragImage);
+
+    const onMouseMove = (e) => {
+      dragImage.style.left = `${e.clientX - offsetX}px`;
+      dragImage.style.top = `${e.clientY - offsetY}px`;
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.body.removeChild(dragImage);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp, { once: true });
   }
 
-  moveDragImage(event) {
-    if (this.dragImage) {
-      this.dragImage.style.left = `${event.clientX - this.offsetX}px`;
-      this.dragImage.style.top = `${event.clientY - this.offsetY}px`;
-    }
-  }
-
-  removeDragImage() {
-    if (this.dragImage) {
-      document.body.removeChild(this.dragImage);
-      this.dragImage = null;
-    }
-  }
-
+  // Add event listeners to make a target draggable
   makeDraggable(target) {
+    if (this.draggableTargets.has(target)) return;
+
+    const callbacks = { dragStart: null, drag: null, dragEnd: null };
+    this.draggableTargets.set(target, callbacks);
+
     let isDragging = false;
 
-    target.addEventListener('mousemove', () => {
-      if ((this.draggedTarget && this.draggedTarget !== target) || this.disabled) {
-        target.style.cursor = '';
-      } else {
+    const onMouseEnter = () => {
+      if (!this.disabled) {
         target.style.cursor = 'grab';
       }
-    });
-
-    // Drag start listener
-    const dragstart = (callback) => {
-      target.addEventListener('mousedown', (e) => {
-        if (this.disabled) return;
-
-        if (e.button !== 0) return;
-
-        const mouseMoveListener = (moveEvent) => {
-          if (!isDragging) {
-            isDragging = true;
-
-            this.draggedTarget = target;
-            this.createDragImage(this.draggedTarget, e);
-            this.moveDragImage(moveEvent);
-
-            callback({
-              clientX: moveEvent.clientX,
-              clientY: moveEvent.clientY,
-              target: target,
-            });
-          }
-        };
-
-        const mouseUpListener = () => {
-          document.removeEventListener('mousemove', mouseMoveListener);
-          document.removeEventListener('mouseup', mouseUpListener);
-        };
-
-        document.addEventListener('mousemove', mouseMoveListener);
-        document.addEventListener('mouseup', mouseUpListener);
-      });
     };
 
-    // Drag end listener
-    const dragend = (callback) => {
-      document.addEventListener('mouseup', (e) => {
-        if (isDragging && this.draggedTarget === target) {
+    const onMouseLeave = () => {
+      target.style.cursor = '';
+    };
+
+    const onMouseDown = (e) => {
+      if (this.disabled || e.button !== 0) return;
+
+      target.style.cursor = 'grabbing';
+
+      // Start the drag event
+      const onMouseMove = (e) => {
+        if (!isDragging) {
+          isDragging = true;
+          this.createDragImage(target, e);
+          callbacks.dragStart?.({ clientX: e.clientX, clientY: e.clientY, target });
+        } else {
+          callbacks.drag?.({ clientX: e.clientX, clientY: e.clientY, target });
+        }
+      };
+
+      // End the drag event
+      const onMouseUp = (e) => {
+        if (isDragging) {
           isDragging = false;
-          this.draggedTarget = null;
-          this.removeDragImage();
-
-          document.body.style.cursor = '';
-          callback({
-            clientX: e.clientX,
-            clientY: e.clientY,
-            target: target,
-          });
+          callbacks.dragEnd?.({ clientX: e.clientX, clientY: e.clientY, target });
         }
-      });
+        target.style.cursor = 'grab';
+        document.removeEventListener('mousemove', onMouseMove);
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp, { once: true });
     };
 
-    // Drag event listener
-    const drag = (callback) => {
-      document.addEventListener('mousemove', (e) => {
-        if (isDragging && this.draggedTarget === target) {
-          document.body.style.cursor = 'grabbing';
-
-          callback({
-            clientX: e.clientX,
-            clientY: e.clientY,
-            target: target,
-          });
-        }
-      });
-    };
-
-    this.draggableTargets.set(target, { dragstart, dragend, drag });
+    target.addEventListener('mouseenter', onMouseEnter);
+    target.addEventListener('mouseleave', onMouseLeave);
+    target.addEventListener('mousedown', onMouseDown);
   }
 
-  listener(func, target, callback) {
-    const dragTarget = this.draggableTargets.get(target);
-    dragTarget[func](callback);
+  // Set or update callbacks for drag events
+  setCallback(target, type, callback) {
+    if (!this.draggableTargets.has(target)) {
+      this.makeDraggable(target);
+    }
+    this.draggableTargets.get(target)[type] = callback;
+  }
+
+  dragStart(target, callback) {
+    this.setCallback(target, 'dragStart', callback);
+  }
+
+  drag(target, callback) {
+    this.setCallback(target, 'drag', callback);
+  }
+
+  dragEnd(target, callback) {
+    this.setCallback(target, 'dragEnd', callback);
   }
 }
 
